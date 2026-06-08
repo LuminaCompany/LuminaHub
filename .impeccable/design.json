@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-04T00:00:00Z",
+  "title": "Design System: LuminaHub",
+  "extensions": {
+    "colorMeta": {
+      "cyan": {
+        "role": "primary",
+        "displayName": "Signal Cyan",
+        "canonical": "oklch(0.87 0.155 198)",
+        "tonalRamp": ["#001F22", "#003A40", "#005A63", "#007A87", "#009DAD", "#00C4D4", "#00EAFF", "#80F4FF"]
+      },
+      "cyan-hi": {
+        "role": "primary-hover",
+        "displayName": "Signal Cyan Hover",
+        "canonical": "oklch(0.89 0.14 198)",
+        "tonalRamp": ["#002226", "#004049", "#005F6E", "#008090", "#00A3B5", "#00C9D9", "#2AEDFF", "#96F7FF"]
+      },
+      "teal": {
+        "role": "secondary",
+        "displayName": "Teal Confiante",
+        "canonical": "oklch(0.68 0.055 200)",
+        "tonalRamp": ["#0D2426", "#1A3D41", "#27585D", "#35737A", "#438F96", "#54A8AF", "#6AA9AF", "#A8D4D8"]
+      },
+      "negative": {
+        "role": "error",
+        "displayName": "Vermelho Negativo",
+        "canonical": "oklch(0.62 0.18 25)",
+        "tonalRamp": ["#2A0A0A", "#4A1212", "#701A1A", "#962222", "#BC2C2C", "#DA3E3E", "#E55050", "#F0A0A0"]
+      },
+      "bg": {
+        "role": "neutral-bg",
+        "displayName": "Void",
+        "canonical": "oklch(0.08 0.008 200)",
+        "tonalRamp": ["#080B0C", "#0C1315", "#111A1C", "#162023", "#1E2E31", "#2E4447", "#6A8A8D", "#C0D8DC"]
+      },
+      "surface": {
+        "role": "surface",
+        "displayName": "Surface",
+        "canonical": "oklch(0.10 0.01 200)",
+        "tonalRamp": ["#080B0C", "#0C1315", "#111A1C", "#162023", "#1E2E31", "#2E4447", "#6A8A8D", "#C0D8DC"]
+      },
+      "fg-1": {
+        "role": "neutral-fg",
+        "displayName": "Fog-1",
+        "canonical": "oklch(0.84 0.025 198)",
+        "tonalRamp": ["#1A2E32", "#234148", "#2E565E", "#3D7078", "#4D8C96", "#6AA9AF", "#9FCCD1", "#C0D8DC"]
+      },
+      "fg-2": {
+        "role": "neutral-fg-muted",
+        "displayName": "Fog-2",
+        "canonical": "oklch(0.58 0.038 200)",
+        "tonalRamp": ["#0D1E20", "#162C30", "#1F3C40", "#2A5058", "#376670", "#4F8A92", "#6AA9AF", "#9FCDD2"]
+      }
+    },
+    "shadows": [
+      {
+        "name": "card-rest",
+        "value": "0 0 0 1px #162023",
+        "purpose": "Borda padrão de card em repouso. Usa outline-like shadow para evitar layout shift."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 0 0 1px #1E2E31",
+        "purpose": "Borda de hover em cards interativos. Confirma interatividade sem mover elemento."
+      },
+      {
+        "name": "glow-primary",
+        "value": "0 8px 32px rgba(0,234,255,0.22)",
+        "purpose": "Glow suave sob botão primário no hover e elementos com estado ativo em cyan. Proibido em repouso."
+      },
+      {
+        "name": "glow-primary-strong",
+        "value": "0 0 18px rgba(0,234,255,0.75), 0 0 38px rgba(0,234,255,0.45), 0 0 65px rgba(0,234,255,0.2)",
+        "purpose": "Glow intenso — reservado para hero display, CTA principal de página. Nunca em UI de densidade normal."
+      },
+      {
+        "name": "focus-ring-primary",
+        "value": "0 0 0 3px rgba(0,234,255,0.12)",
+        "purpose": "Focus ring de acessibilidade para botão primário e inputs com foco cyan."
+      },
+      {
+        "name": "focus-ring-error",
+        "value": "0 0 0 3px rgba(229,80,80,0.12)",
+        "purpose": "Focus ring de estado de erro em inputs."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Easing padrão para transições de estado (hover, focus, active). 0.2s."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.0, 0, 0.2, 1)",
+        "purpose": "Easing de saída para elementos que entram na tela. 0.25-0.35s."
+      },
+      {
+        "name": "duration-fast",
+        "value": "0.15s",
+        "purpose": "Transições de micro-estado: hover de botão, troca de cor de borda. Feedback imediato."
+      },
+      {
+        "name": "duration-standard",
+        "value": "0.25s",
+        "purpose": "Transições padrão: abertura de dropdown, entrada de modal, transição de página."
+      },
+      {
+        "name": "duration-slow",
+        "value": "0.4s",
+        "purpose": "Animações de entrada de seção, skeleton-to-content. Nunca mais lento que 0.5s em UI funcional."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px", "purpose": "Mobile landscape / tablet portrait" },
+      { "name": "md", "value": "768px", "purpose": "Tablet landscape" },
+      { "name": "lg", "value": "1024px", "purpose": "Desktop padrão — breakpoint principal do layout sidebar+content" },
+      { "name": "xl", "value": "1280px", "purpose": "Desktop large — layout de três colunas (sidebar / conteúdo / painel lateral)" },
+      { "name": "2xl", "value": "1536px", "purpose": "Widescreen — densidade máxima" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal de qualquer tela. Background cyan, texto near-black. Máximo um por seção de conteúdo.",
+      "html": "<button class=\"ds-btn-primary\">Criar Projeto <svg width=\"13\" height=\"13\" viewBox=\"0 0 13 13\" fill=\"none\"><path d=\"M2 6.5H11M7.5 3L11 6.5L7.5 10\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; background: #00EAFF; color: #080B0C; font-family: Inter, sans-serif; font-weight: 600; font-size: 14px; padding: 13px 26px; border-radius: 8px; border: none; cursor: pointer; transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; } .ds-btn-primary:hover { background: #2AEDFF; box-shadow: 0 8px 32px rgba(0,234,255,0.22); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,234,255,0.12), 0 8px 32px rgba(0,234,255,0.22); } .ds-btn-primary:active { transform: translateY(0); box-shadow: none; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ação secundária. Transparente com borda. Para ações de suporte ao primário.",
+      "html": "<button class=\"ds-btn-secondary\">Cancelar</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #C0D8DC; font-family: Inter, sans-serif; font-weight: 500; font-size: 14px; padding: 13px 22px; border-radius: 8px; border: 1px solid #1E2E31; cursor: pointer; transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease; } .ds-btn-secondary:hover { border-color: #6AA9AF; color: #6AA9AF; background: rgba(106,169,175,0.07); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,234,255,0.12); border-color: #00EAFF; } .ds-btn-secondary:active { background: rgba(106,169,175,0.12); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Container de conteúdo padrão. Surface escura, borda sutil, radius 12px. Base de todo o dashboard.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Projetos Ativos</h3><p class=\"ds-card-body\">Visualize todos os projetos em andamento.</p></div>",
+      "css": ".ds-card { background: #0C1315; border: 1px solid #162023; border-radius: 12px; padding: 24px; transition: border-color 0.15s ease; } .ds-card:hover { border-color: #1E2E31; } .ds-card-title { font-family: Inter, sans-serif; font-weight: 600; font-size: 15px; color: #C0D8DC; margin: 0 0 8px 0; } .ds-card-body { font-family: Inter, sans-serif; font-size: 15px; color: #6A8A8D; margin: 0; line-height: 1.7; }"
+    },
+    {
+      "name": "KPI Metric Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Card de métrica principal do dashboard. Número Orbitron + label mono + delta. Componente assinatura.",
+      "html": "<div class=\"ds-kpi\"><span class=\"ds-kpi-label\">Projetos Ativos</span><span class=\"ds-kpi-value\">24</span><span class=\"ds-kpi-delta ds-kpi-delta--up\">↑ 3 esta semana</span></div>",
+      "css": ".ds-kpi { background: #0C1315; border: 1px solid #162023; border-radius: 12px; padding: 20px 24px; display: flex; flex-direction: column; gap: 4px; } .ds-kpi-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #6A8A8D; } .ds-kpi-value { font-family: Orbitron, sans-serif; font-weight: 800; font-size: clamp(28px, 3vw, 42px); line-height: 1; color: #FFFFFF; margin: 4px 0; } .ds-kpi-delta { font-family: Inter, sans-serif; font-weight: 600; font-size: 13px; } .ds-kpi-delta--up { color: #00EAFF; } .ds-kpi-delta--down { color: #E55050; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de texto padrão. Surface escura, borda sutil, focus ring cyan.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\">Nome do Projeto</label><input class=\"ds-input\" type=\"text\" placeholder=\"Ex: LuminaHub v2\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; } .ds-label { font-family: Inter, sans-serif; font-weight: 500; font-size: 13px; color: #C0D8DC; } .ds-input { background: #0C1315; border: 1px solid #162023; border-radius: 8px; padding: 10px 14px; font-family: Inter, sans-serif; font-size: 15px; color: #C0D8DC; outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-input::placeholder { color: #2E4447; } .ds-input:hover { border-color: #1E2E31; } .ds-input:focus { border-color: #00EAFF; box-shadow: 0 0 0 3px rgba(0,234,255,0.12); } .ds-input.ds-input--error { border-color: #E55050; } .ds-input.ds-input--error:focus { box-shadow: 0 0 0 3px rgba(229,80,80,0.12); }"
+    },
+    {
+      "name": "Navigation Item",
+      "kind": "nav",
+      "refersTo": "nav-item-default",
+      "description": "Item de sidebar. Inativo em Fog-2, ativo em cyan com background tintado.",
+      "html": "<nav class=\"ds-sidebar-nav\"><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><rect x=\"2\" y=\"2\" width=\"5\" height=\"5\" rx=\"1\" stroke=\"currentColor\" stroke-width=\"1.5\"/><rect x=\"9\" y=\"2\" width=\"5\" height=\"5\" rx=\"1\" stroke=\"currentColor\" stroke-width=\"1.5\"/><rect x=\"2\" y=\"9\" width=\"5\" height=\"5\" rx=\"1\" stroke=\"currentColor\" stroke-width=\"1.5\"/><rect x=\"9\" y=\"9\" width=\"5\" height=\"5\" rx=\"1\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg>Dashboard</a><a class=\"ds-nav-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><path d=\"M3 8h10M8 3l5 5-5 5\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Projetos</a></nav>",
+      "css": ".ds-sidebar-nav { display: flex; flex-direction: column; gap: 2px; padding: 8px; } .ds-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 8px; font-family: Inter, sans-serif; font-size: 14px; font-weight: 500; color: #6A8A8D; text-decoration: none; transition: color 0.15s ease, background 0.15s ease; } .ds-nav-item svg { flex-shrink: 0; transition: color 0.15s ease; } .ds-nav-item:hover { color: #C0D8DC; background: rgba(255,255,255,0.03); } .ds-nav-item--active { color: #00EAFF; background: rgba(0,234,255,0.08); font-weight: 600; } .ds-nav-item--active svg { color: #00EAFF; }"
+    },
+    {
+      "name": "Status Chip",
+      "kind": "chip",
+      "refersTo": "chip-default",
+      "description": "Tag de status para projetos, tarefas, notificações. Padrão neutro + variantes ativo e negativo.",
+      "html": "<div style=\"display:flex;gap:8px;flex-wrap:wrap;\"><span class=\"ds-chip\">Em Andamento</span><span class=\"ds-chip ds-chip--active\">Concluído</span><span class=\"ds-chip ds-chip--negative\">Atrasado</span></div>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; background: #111A1C; color: #6A8A8D; border-radius: 6px; padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; } .ds-chip--active { background: rgba(0,234,255,0.1); color: #00EAFF; border: 1px solid rgba(0,234,255,0.2); } .ds-chip--negative { background: rgba(229,80,80,0.08); color: #E55050; border: 1px solid rgba(229,80,80,0.2); }"
+    },
+    {
+      "name": "Search Bar",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Barra de busca global do topo. Ícone de lupa inline, placeholder escuro, focus com borda cyan.",
+      "html": "<div class=\"ds-search\"><svg class=\"ds-search-icon\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\"><circle cx=\"7\" cy=\"7\" r=\"4.5\" stroke=\"currentColor\" stroke-width=\"1.5\"/><path d=\"M10.5 10.5L13 13\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></svg><input class=\"ds-search-input\" type=\"search\" placeholder=\"Buscar projetos, tarefas...\" /></div>",
+      "css": ".ds-search { display: flex; align-items: center; gap: 10px; background: #0C1315; border: 1px solid #162023; border-radius: 8px; padding: 10px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-search:focus-within { border-color: #00EAFF; box-shadow: 0 0 0 3px rgba(0,234,255,0.12); } .ds-search-icon { color: #2E4447; flex-shrink: 0; transition: color 0.15s ease; } .ds-search:focus-within .ds-search-icon { color: #6A8A8D; } .ds-search-input { background: transparent; border: none; outline: none; font-family: Inter, sans-serif; font-size: 15px; color: #C0D8DC; flex: 1; min-width: 0; } .ds-search-input::placeholder { color: #2E4447; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Centro de Controle",
+    "overview": "LuminaHub é uma sala de operações de missão crítica. Cada métrica visível sem abrir submenus. Cada ação acessível sem três cliques. O design parte de um princípio operacional, não estético: a equipe que usa esta interface trabalha sob pressão real e precisa de respostas imediatas. O sistema serve ao operador, nunca o contrário.\n\nO fundo é void — quase preto com tinte frio (#080B0C), sem neutros quentes, sem gradientes decorativos. Sobre ele, superfícies em camadas progressivamente mais claras definem hierarquia por contraste tonal. A marca aparece em cyan elétrico (#00EAFF), com precisão cirúrgica: botões primários, estados ativos, métricas críticas. Fora desses pontos, o cyan está ausente. Sua raridade é o que dá peso.\n\nA tipografia é uma divisão de funções. Orbitron carrega os títulos de seção e KPIs. Inter carrega 90% da interface. JetBrains Mono marca labels, timestamps e numerais de status.",
+    "keyCharacteristics": [
+      "Dark system por convicção, não por tendência: trabalho de longa duração em tela",
+      "Densidade informacional intencional: nenhum dado escondido atrás de menus desnecessários",
+      "Cyan como sinal, não como decoração: aparece somente onde importa",
+      "Orbitron reservado para identidade e KPIs; Inter lidera a UI",
+      "Responsivo e vivo: feedback imediato, transições rápidas, micro-animações funcionais",
+      "Bordas sutis + glow pontual como linguagem de elevação — nunca sombras decorativas genéricas"
+    ],
+    "rules": [
+      {
+        "name": "A Regra do Sinal Único",
+        "body": "O cyan (#00EAFF) é o único acento primário. Proibido introduzir um segundo acento saturado. A leitura imediata de qualquer elemento cyan depende de não haver competidores.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Fundo Frio",
+        "body": "O background nunca usa tintes quentes. Nenhum tom com chroma hue nos 40-100. O tinte frio do bg harmoniza com o cyan; um bg quente cria dissonância de temperatura.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra das Três Famílias",
+        "body": "Orbitron, Inter, JetBrains Mono. Nenhuma quarta família entra. Mais de três famílias é indecisão, não riqueza.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra Orbitron-Contido",
+        "body": "Orbitron é proibido em texto de corpo, labels de campo, texto de botão, ou qualquer elemento com mais de 6 palavras. Somente em títulos de seção, KPIs numéricos, e o logotipo.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra Flat-por-Padrão",
+        "body": "Em repouso, nenhum elemento tem sombra. Profundidade vem de tonalidade de superfície e borda. Sombras e glows aparecem somente como resposta a estado (hover, active, focus).",
+        "section": "elevation"
+      },
+      {
+        "name": "A Regra do Glow Exclusivo",
+        "body": "O glow cyan é reservado ao acento primário. Nunca aplicar em botões secundários, cards genéricos, ou ícones de suporte. Se aparecer em todo lugar, deixa de ser um sinal.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Usar #00EAFF como o único acento primário. Um sinal, não uma paleta.",
+      "Reservar Orbitron para títulos de seção (Display/Headline) e numerais de KPI.",
+      "Usar border: 1px solid #162023 como definidor padrão de card em repouso.",
+      "Aplicar o glow cyan exclusivamente em hover do botão primário e estados ativos cyan.",
+      "Usar #C0D8DC para texto primário com contraste ≥4.5:1 sobre qualquer superfície escura.",
+      "Manter densidade de informação alta: dashboard mostra estado do sistema sem scroll.",
+      "Usar transform: translateY(-1px) + glow no hover de botões primários."
+    ],
+    "donts": [
+      "Usar backgrounds quentes (hue 40-100 com chroma > 0.01 em OKLCH).",
+      "Introduzir um segundo acento saturado (roxo, laranja, verde-limão).",
+      "Usar box-shadow com blur ≥16px como decoração de card em repouso.",
+      "Usar border-radius acima de 16px em cards ou containers.",
+      "Colocar Orbitron em labels de campo, texto de botão, ou qualquer texto com mais de 6 palavras.",
+      "Usar glassmorphism como padrão de card.",
+      "Criar gradientes de texto (background-clip: text).",
+      "Usar border-left como acento decorativo stripe em cards.",
+      "Replicar o padrão AI-padrão 2026: fundo quente + gradiente roxo + glassmorphism.",
+      "Fazer Orbitron aparecer como eyebrow em toda seção — gramática de IA saturada."
+    ]
+  }
+}
