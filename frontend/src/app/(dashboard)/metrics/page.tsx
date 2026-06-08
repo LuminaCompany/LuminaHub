@@ -3,6 +3,7 @@ import { CACHE_TAGS } from "@/lib/cache";
 import { MetricsOverviewCards } from "@/components/metrics/overview-cards";
 import { GoalsGrid } from "@/components/metrics/goals-grid";
 import { GoalForm } from "@/components/metrics/goal-form";
+import { Can } from "@/components/permissions-provider";
 import type { Goal } from "@/types";
 
 interface MetricsOverview {
@@ -56,7 +57,9 @@ export default async function MetricsPage() {
             Indicadores de performance e metas — {YEAR}
           </p>
         </div>
-        <GoalForm />
+        <Can resource="metrics" action="create">
+          <GoalForm />
+        </Can>
       </div>
 
       <MetricsOverviewCards data={overview} />

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
+import { usePermissions } from "@/components/permissions-provider";
 
 interface AddColumnInlineProps {
   projectId?: string;
@@ -15,6 +16,10 @@ export function AddColumnInline({ projectId, nextPosition, onCreated }: AddColum
   const [active, setActive] = useState(false);
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const { can } = usePermissions();
+
+  // Creating a column requires tasks:create. Hide entirely otherwise.
+  if (!can("tasks", "create")) return null;
 
   async function handleCreate() {
     const name = value.trim();

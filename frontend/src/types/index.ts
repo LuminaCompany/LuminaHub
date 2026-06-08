@@ -1,11 +1,32 @@
-// ── Users ──
+// ── Users & permissions ──
+export type Role = "manager" | "collaborator"
+
+export type PermResource = "home" | "metrics" | "tasks" | "finance" | "clients"
+export type PermAction = "view" | "create" | "edit" | "delete"
+
+/** Per-resource action map for a collaborator. */
+export type PermissionMap = Partial<
+  Record<PermResource, Partial<Record<PermAction, boolean>>>
+>
+
 export interface User {
   id: string
   name: string
   email: string
   avatar_url: string | null
+  role: Role
+  permissions: PermissionMap
   created_at: string
   updated_at: string
+}
+
+/** The current user's profile + resolved access, used across the UI. */
+export interface Profile {
+  id: string
+  name: string
+  email: string
+  role: Role
+  permissions: PermissionMap
 }
 
 // ── Goals ──

@@ -10,6 +10,7 @@ import {
   Wallet,
   Users,
   FileText,
+  Settings,
   ChevronDown,
   ChevronRight,
   Menu,
@@ -21,6 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { can, isManager } from "@/lib/permissions";
+import type { PermResource, Profile } from "@/types";
 import type { User } from "@supabase/supabase-js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -32,6 +35,8 @@ interface NavItem {
   disabled?: boolean;
   badge?: string;
   children?: NavChild[];
+  /** Resource gating this item; omitted = always visible. */
+  resource?: PermResource;
 }
 
 interface NavChild {
@@ -42,6 +47,7 @@ interface NavChild {
 
 interface SidebarProps {
   user: User | null;
+  profile?: Profile | null;
   projectCount?: number;
   internalTaskCount?: number;
 }
@@ -50,21 +56,28 @@ const COLLAPSED_KEY = "luminahub:sidebar-collapsed";
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
 
-function buildNavItems(projectCount = 0, internalTaskCount = 0): NavItem[] {
-  return [
+function buildNavItems(
+  profile: Profile | null | undefined,
+  projectCount = 0,
+  internalTaskCount = 0
+): NavItem[] {
+  const items: NavItem[] = [
     {
       label: "Home",
       href: "/home",
       icon: <Home size={16} />,
+      resource: "home",
     },
     {
       label: "Métricas",
       href: "/metrics",
       icon: <BarChart3 size={16} />,
+      resource: "metrics",
     },
     {
       label: "Tarefas",
       icon: <ClipboardList size={16} />,
+      resource: "tasks",
       children: [
         {
           label: "Projetos",
@@ -82,11 +95,13 @@ function buildNavItems(projectCount = 0, internalTaskCount = 0): NavItem[] {
       label: "Finanças",
       href: "/finance",
       icon: <Wallet size={16} />,
+      resource: "finance",
     },
     {
       label: "Clientes",
       href: "/clients",
       icon: <Users size={16} />,
+      resource: "clients",
     },
     {
       label: "Formulários",
@@ -96,6 +111,11 @@ function buildNavItems(projectCount = 0, internalTaskCount = 0): NavItem[] {
       badge: "Em breve",
     },
   ];
+
+  // Hide any tab the user cannot at least view.
+  return items.filter(
+    (item) => !item.resource || can(profile, item.resource, "view")
+  );
 }
 
 // ─── Nav item components ──────────────────────────────────────────────────────
@@ -359,12 +379,14 @@ function NavDropdown({
 
 function SidebarContent({
   user,
+  profile,
   projectCount,
   internalTaskCount,
   collapsed,
   onNavClick,
 }: SidebarProps & { collapsed?: boolean; onNavClick?: () => void }) {
-  const navItems = buildNavItems(projectCount, internalTaskCount);
+  const navItems = buildNavItems(profile, projectCount, internalTaskCount);
+  const showSettings = isManager(profile?.role);
 
   const displayName =
     user?.user_metadata?.full_name ??
@@ -445,6 +467,19 @@ function SidebarContent({
           );
         })}
       </nav>
+
+      {/* Settings (managers only) — sits just above the user block */}
+      {showSettings && (
+        <div className={`${collapsed ? "px-2" : "px-3"} pb-1`}>
+          <NavLink
+            href="/settings"
+            label="Configurações"
+            icon={<Settings size={16} />}
+            collapsed={collapsed}
+            onClick={onNavClick}
+          />
+        </div>
+      )}
 
       {/* User */}
       <div

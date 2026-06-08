@@ -6,6 +6,7 @@ import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.admin import router as admin_router
 from app.api.auth import router as auth_router
 from app.api.clients import router as clients_router
 from app.api.columns import router as columns_router
@@ -52,6 +53,7 @@ app.add_middleware(
 register_exception_handlers(app)
 
 app.include_router(auth_router)
+app.include_router(admin_router)
 app.include_router(clients_router)
 app.include_router(services_router)
 app.include_router(payments_router)

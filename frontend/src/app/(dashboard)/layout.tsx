@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/sidebar";
-import { serverFetch } from "@/lib/api.server";
+import { PermissionsProvider } from "@/components/permissions-provider";
+import { serverFetch, getProfile } from "@/lib/api.server";
 import { CACHE_TAGS } from "@/lib/cache";
 import type { Column } from "@/types";
 
@@ -53,23 +54,31 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const [projectCount, internalTaskCount] = await Promise.all([
+  const [profile, projectCount, internalTaskCount] = await Promise.all([
+    getProfile(),
     fetchProjectTaskCount(),
     fetchInternalTaskCount(),
   ]);
 
   return (
-    <div
-      className="flex min-h-screen"
-      style={{ backgroundColor: "var(--bg)" }}
-    >
-      <Sidebar user={user} projectCount={projectCount} internalTaskCount={internalTaskCount} />
+    <PermissionsProvider profile={profile}>
+      <div
+        className="flex min-h-screen"
+        style={{ backgroundColor: "var(--bg)" }}
+      >
+        <Sidebar
+          user={user}
+          profile={profile}
+          projectCount={projectCount}
+          internalTaskCount={internalTaskCount}
+        />
 
-      <main className="flex-1 min-w-0 flex flex-col">
-        <div className="flex-1 p-6 md:p-8">
-          {children}
-        </div>
-      </main>
-    </div>
+        <main className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 p-6 md:p-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </PermissionsProvider>
   );
 }

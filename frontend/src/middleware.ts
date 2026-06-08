@@ -8,10 +8,48 @@ const DASHBOARD_PATHS = [
   "/finance",
   "/clients",
   "/forms",
+  "/settings",
 ];
+
+// Maps a route prefix to the resource that gates it. Routes not listed here
+// (e.g. /home, /forms) are accessible to any authenticated user.
+const ROUTE_RESOURCE: Record<string, string> = {
+  "/metrics": "metrics",
+  "/tasks": "tasks",
+  "/finance": "finance",
+  "/clients": "clients",
+};
+
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
 
 function isDashboardPath(pathname: string) {
   return DASHBOARD_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
+function resourceForPath(pathname: string): string | null {
+  for (const [prefix, resource] of Object.entries(ROUTE_RESOURCE)) {
+    if (pathname === prefix || pathname.startsWith(prefix + "/")) return resource;
+  }
+  return null;
+}
+
+type Profile = {
+  role: "manager" | "collaborator";
+  permissions: Record<string, Record<string, boolean>>;
+};
+
+async function fetchProfile(token: string): Promise<Profile | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/v1/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as Profile;
+  } catch {
+    return null;
+  }
 }
 
 export async function middleware(request: NextRequest) {
@@ -57,6 +95,35 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/home";
     return NextResponse.redirect(url);
+  }
+
+  // Role/permission gating for authenticated users on guarded routes.
+  const needsSettings = pathname === "/settings" || pathname.startsWith("/settings/");
+  const guardedResource = resourceForPath(pathname);
+  if (user && (needsSettings || guardedResource)) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    const profile = token ? await fetchProfile(token) : null;
+    const isManager = profile?.role === "manager";
+
+    // Configurações is manager-only.
+    if (needsSettings && !isManager) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/home";
+      return NextResponse.redirect(url);
+    }
+
+    // Tab access requires `view` on the mapped resource (managers bypass).
+    if (guardedResource && !isManager) {
+      const canView = Boolean(profile?.permissions?.[guardedResource]?.view);
+      if (!canView) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/home";
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return supabaseResponse;

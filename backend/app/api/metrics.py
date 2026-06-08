@@ -5,7 +5,8 @@ from datetime import date
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
-from app.core.auth import get_current_user
+from app.core.auth import require_permission
+from app.core.permissions import Action, Resource
 from app.db.client import get_supabase
 
 router = APIRouter(prefix="/api/v1/metrics", tags=["metrics"])
@@ -21,7 +22,7 @@ class MetricsOverview(BaseModel):
 async def get_overview(
     from_date: date | None = Query(default=None, alias="from"),
     to_date: date | None = Query(default=None, alias="to"),
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(Resource.METRICS, Action.VIEW)),
     sb=Depends(get_supabase),
 ) -> MetricsOverview:
     tasks_completed = await _count_completed_tasks(sb, from_date, to_date)

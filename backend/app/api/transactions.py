@@ -5,9 +5,10 @@ from datetime import date
 
 from fastapi import APIRouter, Depends, Query
 
-from app.core.auth import get_current_user
+from app.core.auth import require_permission
 from app.core.exceptions import NotFoundError, ValidationError
 from app.core.pagination import PaginatedResponse, build_paginated_response, paginate
+from app.core.permissions import Action, Resource
 from app.db.client import get_supabase
 from app.db.transactions import (
     db_create_transaction,
@@ -24,6 +25,8 @@ from app.models.transactions import (
 
 router = APIRouter(prefix="/api/v1/transactions", tags=["transactions"])
 
+_R = Resource.FINANCE
+
 
 @router.get("", response_model=PaginatedResponse[TransactionResponse])
 async def list_transactions(
@@ -33,7 +36,7 @@ async def list_transactions(
     client_id: uuid.UUID | None = Query(default=None),
     date_from: date | None = Query(default=None),
     date_to: date | None = Query(default=None),
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.VIEW)),
     sb=Depends(get_supabase),
 ) -> PaginatedResponse[TransactionResponse]:
     offset, limit = paginate(page, per_page)
@@ -53,7 +56,7 @@ async def list_transactions(
 @router.post("", response_model=TransactionResponse, status_code=201)
 async def create_transaction(
     payload: TransactionCreate,
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.CREATE)),
     sb=Depends(get_supabase),
 ) -> TransactionResponse:
     row = await db_create_transaction(sb, payload)
@@ -64,7 +67,7 @@ async def create_transaction(
 async def update_transaction(
     transaction_id: uuid.UUID,
     payload: TransactionUpdate,
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.EDIT)),
     sb=Depends(get_supabase),
 ) -> TransactionResponse:
     existing = await db_get_transaction(sb, str(transaction_id))
@@ -79,7 +82,7 @@ async def update_transaction(
 @router.delete("/{transaction_id}", status_code=204)
 async def delete_transaction(
     transaction_id: uuid.UUID,
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.DELETE)),
     sb=Depends(get_supabase),
 ) -> None:
     existing = await db_get_transaction(sb, str(transaction_id))

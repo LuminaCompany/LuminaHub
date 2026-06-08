@@ -4,9 +4,10 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.core.auth import get_current_user
+from app.core.auth import require_permission
 from app.core.exceptions import NotFoundError
 from app.core.pagination import PaginatedResponse, build_paginated_response, paginate
+from app.core.permissions import Action, Resource
 from app.db.client import get_supabase
 from app.db.services import (
     db_create_service,
@@ -18,6 +19,8 @@ from app.models.services import ServiceCreate, ServiceResponse, ServiceUpdate
 
 router = APIRouter(prefix="/api/v1", tags=["services"])
 
+_R = Resource.CLIENTS
+
 
 @router.get(
     "/clients/{client_id}/services",
@@ -27,7 +30,7 @@ async def list_services(
     client_id: uuid.UUID,
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=50, ge=1, le=100),
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.VIEW)),
     sb=Depends(get_supabase),
 ) -> PaginatedResponse[ServiceResponse]:
     offset, limit = paginate(page, per_page)
@@ -41,7 +44,7 @@ async def list_services(
 @router.post("/services", response_model=ServiceResponse, status_code=201)
 async def create_service(
     payload: ServiceCreate,
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.CREATE)),
     sb=Depends(get_supabase),
 ) -> ServiceResponse:
     row = await db_create_service(sb, payload)
@@ -52,7 +55,7 @@ async def create_service(
 async def update_service(
     service_id: uuid.UUID,
     payload: ServiceUpdate,
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.EDIT)),
     sb=Depends(get_supabase),
 ) -> ServiceResponse:
     row = await db_update_service(sb, str(service_id), payload)
@@ -64,7 +67,7 @@ async def update_service(
 @router.delete("/services/{service_id}", status_code=204)
 async def delete_service(
     service_id: uuid.UUID,
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.DELETE)),
     sb=Depends(get_supabase),
 ) -> None:
     deleted = await db_delete_service(sb, str(service_id))

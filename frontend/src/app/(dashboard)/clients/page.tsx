@@ -2,6 +2,7 @@ import { serverFetch } from "@/lib/api.server";
 import { CACHE_TAGS } from "@/lib/cache";
 import { ClientsTable } from "@/components/clients/clients-table";
 import { ClientForm } from "@/components/clients/client-form";
+import { Can } from "@/components/permissions-provider";
 import type { Client } from "@/types";
 
 interface ClientWithServiceCount extends Client {
@@ -35,7 +36,9 @@ export default async function ClientsPage() {
           </p>
         </div>
 
-        <ClientForm />
+        <Can resource="clients" action="create">
+          <ClientForm />
+        </Can>
       </div>
 
       <ClientsTable clients={clients} />

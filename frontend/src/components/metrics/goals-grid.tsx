@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { GoalCard } from "@/components/metrics/goal-card";
+import { usePermissions } from "@/components/permissions-provider";
 import { api } from "@/lib/api";
 import type { Goal } from "@/types";
 
@@ -11,6 +12,8 @@ interface GoalsGridProps {
 
 export function GoalsGrid({ goals }: GoalsGridProps) {
   const router = useRouter();
+  const { can } = usePermissions();
+  const canEdit = can("metrics", "edit");
 
   async function handleComplete(id: string) {
     try {
@@ -45,7 +48,11 @@ export function GoalsGrid({ goals }: GoalsGridProps) {
       }}
     >
       {goals.map((goal) => (
-        <GoalCard key={goal.id} goal={goal} onComplete={handleComplete} />
+        <GoalCard
+          key={goal.id}
+          goal={goal}
+          onComplete={canEdit ? handleComplete : undefined}
+        />
       ))}
     </div>
   );

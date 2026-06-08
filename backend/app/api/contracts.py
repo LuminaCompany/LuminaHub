@@ -4,15 +4,16 @@ import uuid
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 
-from app.core.auth import get_current_user
-from app.core.config import settings
-from app.core.exceptions import NotFoundError, ValidationError
+from app.core.auth import require_permission
+from app.core.exceptions import NotFoundError
+from app.core.permissions import Action, Resource
 from app.db.client import get_supabase
 from app.db.transactions import db_create_contract, db_delete_contract, db_get_contract
 from app.models.contracts import ContractCreate, ContractResponse
 
 router = APIRouter(prefix="/api/v1/contracts", tags=["contracts"])
 
+_R = Resource.CLIENTS
 _BUCKET = "contracts"
 
 
@@ -22,7 +23,7 @@ async def create_contract(
     name: str = Form(...),
     url: str | None = Form(default=None),
     file: UploadFile | None = File(default=None),
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.CREATE)),
     sb=Depends(get_supabase),
 ) -> ContractResponse:
     file_path: str | None = None
@@ -45,7 +46,7 @@ async def create_contract(
 @router.delete("/{contract_id}", status_code=204)
 async def delete_contract(
     contract_id: uuid.UUID,
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.DELETE)),
     sb=Depends(get_supabase),
 ) -> None:
     existing = await db_get_contract(sb, str(contract_id))

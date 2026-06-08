@@ -3,6 +3,7 @@ import { CACHE_TAGS } from "@/lib/cache";
 import type { Column, Project } from "@/types";
 import { ProjectBoard } from "@/components/kanban/project-board";
 import { CreateProjectDialog } from "@/components/kanban/create-project-dialog";
+import { Can } from "@/components/permissions-provider";
 import { Button } from "@/components/ui/button";
 
 interface UserSummary {
@@ -65,19 +66,21 @@ export default async function ProjectsPage() {
           </p>
         </div>
 
-        <CreateProjectDialog
-          trigger={
-            <Button
-              style={{
-                backgroundColor: "rgba(0,234,255,0.1)",
-                color: "var(--cyan)",
-                border: "1px solid rgba(0,234,255,0.25)",
-              }}
-            >
-              + Novo Projeto
-            </Button>
-          }
-        />
+        <Can resource="tasks" action="create">
+          <CreateProjectDialog
+            trigger={
+              <Button
+                style={{
+                  backgroundColor: "rgba(0,234,255,0.1)",
+                  color: "var(--cyan)",
+                  border: "1px solid rgba(0,234,255,0.25)",
+                }}
+              >
+                + Novo Projeto
+              </Button>
+            }
+          />
+        </Can>
       </div>
 
       {projectsWithColumns.length === 0 ? (

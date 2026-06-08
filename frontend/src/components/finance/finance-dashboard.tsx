@@ -8,6 +8,7 @@ import { ProjectionCard } from "./projection-card";
 import { PartnerSplitCard } from "./partner-split-card";
 import { TransactionForm } from "./transaction-form";
 import { ExportButton } from "./export-button";
+import { Can } from "@/components/permissions-provider";
 import { api } from "@/lib/api";
 
 interface InitialData {
@@ -81,7 +82,9 @@ export function FinanceDashboard({ initial }: FinanceDashboardProps) {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
         <PeriodFilter onChange={fetchPeriodData} defaultValue="month" />
         <div style={{ display: "flex", gap: "8px" }}>
-          <TransactionForm />
+          <Can resource="finance" action="create">
+            <TransactionForm />
+          </Can>
           <ExportButton data={chart} />
         </div>
       </div>

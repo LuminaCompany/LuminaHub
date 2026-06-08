@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { usePermissions } from "@/components/permissions-provider";
 
 interface KanbanColumnProps {
   column: Column;
@@ -38,6 +39,11 @@ export function KanbanColumn({
   const [renameOpen, setRenameOpen] = useState(false);
   const [nameValue, setNameValue] = useState(column.name);
   const tasks = column.tasks ?? [];
+
+  const { can } = usePermissions();
+  const canCreate = can("tasks", "create");
+  const canEdit = can("tasks", "edit");
+  const canDelete = can("tasks", "delete");
 
   function handleRename() {
     if (nameValue.trim()) {
@@ -90,48 +96,56 @@ export function KanbanColumn({
             </div>
 
             <div className="flex items-center gap-1">
-              <button
-                onClick={onTaskCreate}
-                className="p-1 rounded opacity-60 hover:opacity-100 transition-opacity"
-                style={{ color: "var(--fg-2)" }}
-                title="Adicionar tarefa"
-              >
-                <Plus size={14} />
-              </button>
-              <div className="relative">
+              {canCreate && (
                 <button
-                  onClick={() => setMenuOpen((v) => !v)}
+                  onClick={onTaskCreate}
                   className="p-1 rounded opacity-60 hover:opacity-100 transition-opacity"
                   style={{ color: "var(--fg-2)" }}
+                  title="Adicionar tarefa"
                 >
-                  <MoreHorizontal size={14} />
+                  <Plus size={14} />
                 </button>
-                {menuOpen && (
-                  <div
-                    className="absolute right-0 top-full mt-1 z-20 rounded-lg overflow-hidden"
-                    style={{
-                      backgroundColor: "var(--surface-2)",
-                      border: "1px solid var(--border-2)",
-                      minWidth: 140,
-                    }}
+              )}
+              {(canEdit || canDelete) && (
+                <div className="relative">
+                  <button
+                    onClick={() => setMenuOpen((v) => !v)}
+                    className="p-1 rounded opacity-60 hover:opacity-100 transition-opacity"
+                    style={{ color: "var(--fg-2)" }}
                   >
-                    <button
-                      onClick={() => { setRenameOpen(true); setMenuOpen(false); }}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left transition-colors hover:bg-white/5"
-                      style={{ color: "var(--fg-1)" }}
+                    <MoreHorizontal size={14} />
+                  </button>
+                  {menuOpen && (
+                    <div
+                      className="absolute right-0 top-full mt-1 z-20 rounded-lg overflow-hidden"
+                      style={{
+                        backgroundColor: "var(--surface-2)",
+                        border: "1px solid var(--border-2)",
+                        minWidth: 140,
+                      }}
                     >
-                      <Pencil size={13} /> Renomear
-                    </button>
-                    <button
-                      onClick={() => { onDelete(); setMenuOpen(false); }}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left transition-colors hover:bg-white/5"
-                      style={{ color: "var(--negative)" }}
-                    >
-                      <Trash2 size={13} /> Excluir
-                    </button>
-                  </div>
-                )}
-              </div>
+                      {canEdit && (
+                        <button
+                          onClick={() => { setRenameOpen(true); setMenuOpen(false); }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left transition-colors hover:bg-white/5"
+                          style={{ color: "var(--fg-1)" }}
+                        >
+                          <Pencil size={13} /> Renomear
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => { onDelete(); setMenuOpen(false); }}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-left transition-colors hover:bg-white/5"
+                          style={{ color: "var(--negative)" }}
+                        >
+                          <Trash2 size={13} /> Excluir
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

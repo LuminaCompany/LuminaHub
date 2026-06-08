@@ -4,12 +4,14 @@ from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, Query
 
-from app.core.auth import get_current_user
+from app.core.auth import require_permission
+from app.core.permissions import Action, Resource
 from app.db.client import get_supabase
 from app.services.finance import FinanceService
 
 router = APIRouter(prefix="/api/v1/finance", tags=["finance"])
 
+_R = Resource.FINANCE
 _CURRENT_YEAR = datetime.today().year
 _CURRENT_MONTH = datetime.today().month
 
@@ -19,7 +21,7 @@ async def get_summary(
     period: str = Query(default="month"),
     year: int = Query(default=_CURRENT_YEAR),
     month: int = Query(default=_CURRENT_MONTH, ge=1, le=12),
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.VIEW)),
     sb=Depends(get_supabase),
 ) -> dict:
     svc = FinanceService(sb)
@@ -30,7 +32,7 @@ async def get_summary(
 async def get_chart(
     type: str = Query(default="monthly"),
     year: int = Query(default=_CURRENT_YEAR),
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.VIEW)),
     sb=Depends(get_supabase),
 ) -> list[dict]:
     svc = FinanceService(sb)
@@ -40,7 +42,7 @@ async def get_chart(
 @router.get("/projection")
 async def get_projection(
     year: int = Query(default=_CURRENT_YEAR),
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.VIEW)),
     sb=Depends(get_supabase),
 ) -> dict:
     svc = FinanceService(sb)
@@ -51,7 +53,7 @@ async def get_projection(
 async def get_split(
     from_date: date = Query(default=date(_CURRENT_YEAR, 1, 1), alias="from"),
     to_date: date = Query(default=date(_CURRENT_YEAR, 12, 31), alias="to"),
-    _: str = Depends(get_current_user),
+    _=Depends(require_permission(_R, Action.VIEW)),
     sb=Depends(get_supabase),
 ) -> dict:
     svc = FinanceService(sb)
