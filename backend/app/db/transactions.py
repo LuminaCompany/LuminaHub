@@ -29,13 +29,13 @@ async def db_list_transactions(
     if date_to:
         query = query.lte("competence_date", date_to.isoformat())
     query = query.order("competence_date", desc=True).range(offset, offset + limit - 1)
-    response = await query
+    response = await query.execute()
     return response.data or [], response.count or 0
 
 
 async def db_get_transaction(sb: AsyncClient, transaction_id: str) -> dict | None:
     response = await (
-        sb.table(_TABLE).select("*").eq("id", transaction_id).maybe_single()
+        sb.table(_TABLE).select("*").eq("id", transaction_id).maybe_single().execute()
     )
     return response.data
 
@@ -78,6 +78,7 @@ async def db_list_contracts(sb: AsyncClient, client_id: str) -> list[dict]:
         .select("*")
         .eq("client_id", client_id)
         .order("created_at", desc=True)
+        .execute()
     )
     return response.data or []
 
@@ -89,7 +90,7 @@ async def db_create_contract(sb: AsyncClient, data: dict) -> dict:
 
 async def db_get_contract(sb: AsyncClient, contract_id: str) -> dict | None:
     response = await (
-        sb.table("contracts").select("*").eq("id", contract_id).maybe_single()
+        sb.table("contracts").select("*").eq("id", contract_id).maybe_single().execute()
     )
     return response.data
 

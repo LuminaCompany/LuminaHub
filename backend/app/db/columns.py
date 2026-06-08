@@ -25,7 +25,7 @@ async def db_list_columns(
 
 
 async def db_get_column(sb: AsyncClient, column_id: str) -> dict | None:
-    response = await sb.table(_TABLE).select("*").eq("id", column_id).maybe_single()
+    response = await sb.table(_TABLE).select("*").eq("id", column_id).maybe_single().execute()
     return response.data
 
 

@@ -18,12 +18,12 @@ async def db_list_clients(
     if status:
         query = query.eq("status", status)
     query = query.order("created_at", desc=True).range(offset, offset + limit - 1)
-    response = await query
+    response = await query.execute()
     return response.data or [], response.count or 0
 
 
 async def db_get_client(sb: AsyncClient, client_id: str) -> dict | None:
-    response = await sb.table(_TABLE).select("*").eq("id", client_id).maybe_single()
+    response = await sb.table(_TABLE).select("*").eq("id", client_id).maybe_single().execute()
     return response.data
 
 
@@ -61,6 +61,7 @@ async def db_get_client_totals(sb: AsyncClient, client_id: str) -> dict:
         .select("amount")
         .eq("client_id", client_id)
         .eq("type", "income")
+        .execute()
     )
     total_received = sum(float(r["amount"]) for r in (received_resp.data or []))
 
@@ -69,11 +70,12 @@ async def db_get_client_totals(sb: AsyncClient, client_id: str) -> dict:
         .select("amount, service_payment_id, service_payments!inner(service_id, services!inner(client_id))")
         .eq("status", "pending")
         .eq("service_payments.services.client_id", client_id)
+        .execute()
     )
     total_pending = sum(float(r["amount"]) for r in (pending_resp.data or []))
 
     services_resp = await (
-        sb.table("services").select("id", count="exact").eq("client_id", client_id)
+        sb.table("services").select("id", count="exact").eq("client_id", client_id).execute()
     )
     return {
         "total_received": total_received,

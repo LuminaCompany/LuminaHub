@@ -20,6 +20,7 @@ async def _sum_by_type(
         .eq("type", tx_type)
         .gte("competence_date", date_from.isoformat())
         .lte("competence_date", date_to.isoformat())
+        .execute()
     )
     rows = response.data or []
     return sum((Decimal(str(r["amount"])) for r in rows), Decimal("0"))

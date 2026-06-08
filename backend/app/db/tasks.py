@@ -28,13 +28,13 @@ async def db_list_tasks(
     if tag:
         query = query.contains("tags", [tag])
     query = query.order("position").range(offset, offset + limit - 1)
-    response = await query
+    response = await query.execute()
     return response.data or [], response.count or 0
 
 
 async def db_get_task(sb: AsyncClient, task_id: str) -> dict | None:
     response = (
-        await sb.table(_TABLE).select(_TASK_SELECT).eq("id", task_id).maybe_single()
+        await sb.table(_TABLE).select(_TASK_SELECT).eq("id", task_id).maybe_single().execute()
     )
     return response.data
 

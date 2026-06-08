@@ -13,7 +13,7 @@ async def db_list_projects(sb: AsyncClient) -> list[dict]:
 
 
 async def db_get_project(sb: AsyncClient, project_id: str) -> dict | None:
-    response = await sb.table(_TABLE).select("*").eq("id", project_id).maybe_single()
+    response = await sb.table(_TABLE).select("*").eq("id", project_id).maybe_single().execute()
     return response.data
 
 

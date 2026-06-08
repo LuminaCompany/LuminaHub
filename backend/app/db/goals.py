@@ -24,13 +24,13 @@ async def db_list_goals(
     if date_to:
         query = query.lte("target_date", date_to.isoformat())
     query = query.order("created_at", desc=True)
-    response = await query
+    response = await query.execute()
     return response.data or []
 
 
 async def db_get_goal(sb: AsyncClient, goal_id: str) -> dict | None:
     response = await (
-        sb.table(_TABLE).select("*").eq("id", goal_id).maybe_single()
+        sb.table(_TABLE).select("*").eq("id", goal_id).maybe_single().execute()
     )
     return response.data
 
@@ -93,6 +93,7 @@ async def db_compute_current_value(sb: AsyncClient, goal_id: str) -> float:
         .eq("type", "income")
         .gte("competence_date", goal["start_date"])
         .lte("competence_date", goal["target_date"])
+        .execute()
     )
     rows = response.data or []
     total = sum(float(r["amount"]) for r in rows)

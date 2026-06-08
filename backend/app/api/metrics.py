@@ -36,7 +36,7 @@ async def get_overview(
 
 async def _count_completed_tasks(sb, from_date: date | None, to_date: date | None) -> int:
     done_cols_resp = await (
-        sb.table("columns").select("id").ilike("name", "%done%")
+        sb.table("columns").select("id").ilike("name", "%done%").execute()
     )
     done_col_ids = [r["id"] for r in (done_cols_resp.data or [])]
     if not done_col_ids:
@@ -47,7 +47,7 @@ async def _count_completed_tasks(sb, from_date: date | None, to_date: date | Non
         query = query.gte("updated_at", from_date.isoformat())
     if to_date:
         query = query.lte("updated_at", to_date.isoformat())
-    resp = await query
+    resp = await query.execute()
     return resp.count or 0
 
 
@@ -57,12 +57,12 @@ async def _count_achieved_goals(sb, from_date: date | None, to_date: date | None
         query = query.gte("completed_at", from_date.isoformat())
     if to_date:
         query = query.lte("completed_at", to_date.isoformat())
-    resp = await query
+    resp = await query.execute()
     return resp.count or 0
 
 
 async def _count_active_services(sb) -> int:
     resp = await (
-        sb.table("services").select("id", count="exact").eq("status", "in_progress")
+        sb.table("services").select("id", count="exact").eq("status", "in_progress").execute()
     )
     return resp.count or 0

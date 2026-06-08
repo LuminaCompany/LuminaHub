@@ -23,6 +23,7 @@ async def db_list_services(
         .eq("client_id", client_id)
         .order("created_at", desc=True)
         .range(offset, offset + limit - 1)
+        .execute()
     )
     return response.data or [], response.count or 0
 
@@ -39,7 +40,7 @@ async def db_update_service(
 ) -> dict | None:
     data = payload.model_dump(exclude_none=True)
     if not data:
-        response = await sb.table(_SERVICES).select("*").eq("id", service_id).maybe_single()
+        response = await sb.table(_SERVICES).select("*").eq("id", service_id).maybe_single().execute()
         return response.data
     response = await sb.table(_SERVICES).update(data).eq("id", service_id).execute()
     return response.data[0] if response.data else None
@@ -65,6 +66,7 @@ async def db_get_payment_with_installments(sb: AsyncClient, payment_id: str) -> 
         .select(f"*, {_INSTALLMENTS}(*)")
         .eq("id", payment_id)
         .maybe_single()
+        .execute()
     )
     return response.data
 
@@ -76,7 +78,7 @@ async def db_delete_payment(sb: AsyncClient, payment_id: str) -> bool:
 
 async def db_get_installment(sb: AsyncClient, installment_id: str) -> dict | None:
     response = await (
-        sb.table(_INSTALLMENTS).select("*").eq("id", installment_id).maybe_single()
+        sb.table(_INSTALLMENTS).select("*").eq("id", installment_id).maybe_single().execute()
     )
     return response.data
 
