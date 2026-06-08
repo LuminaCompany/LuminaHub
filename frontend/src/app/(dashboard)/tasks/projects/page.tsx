@@ -1,5 +1,5 @@
 import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/api.server";
 import type { Column, Project } from "@/types";
 import { ProjectBoard } from "@/components/kanban/project-board";
 import { CreateProjectDialog } from "@/components/kanban/create-project-dialog";
@@ -18,7 +18,7 @@ interface ProjectWithColumns extends Project {
 
 async function fetchProjects(): Promise<Project[]> {
   return cachedFetch(
-    () => api.get<Project[]>("/api/v1/projects"),
+    () => serverApi.get<Project[]>("/api/v1/projects"),
     ["projects-list"],
     { tags: [CACHE_TAGS.projects], revalidate: 60 }
   );
@@ -26,7 +26,7 @@ async function fetchProjects(): Promise<Project[]> {
 
 async function fetchProjectColumns(projectId: string): Promise<Column[]> {
   return cachedFetch(
-    () => api.get<Column[]>(`/api/v1/projects/${projectId}/columns`),
+    () => serverApi.get<Column[]>(`/api/v1/projects/${projectId}/columns`),
     ["project-columns", projectId],
     { tags: [CACHE_TAGS.projects], revalidate: 60 }
   );
@@ -34,7 +34,7 @@ async function fetchProjectColumns(projectId: string): Promise<Column[]> {
 
 async function fetchUsers(): Promise<UserSummary[]> {
   return cachedFetch(
-    () => api.get<UserSummary[]>("/api/v1/auth/users"),
+    () => serverApi.get<UserSummary[]>("/api/v1/auth/users"),
     ["users-list"],
     { tags: [CACHE_TAGS.projects], revalidate: 300 }
   );

@@ -1,5 +1,5 @@
 import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/api.server";
 import { MetricsOverviewCards } from "@/components/metrics/overview-cards";
 import { GoalsGrid } from "@/components/metrics/goals-grid";
 import { GoalForm } from "@/components/metrics/goal-form";
@@ -18,7 +18,7 @@ const TO = `${YEAR}-12-31`;
 
 async function fetchOverview(): Promise<MetricsOverview> {
   return cachedFetch(
-    () => api.get<MetricsOverview>(`/api/v1/metrics/overview?from=${FROM}&to=${TO}`),
+    () => serverApi.get<MetricsOverview>(`/api/v1/metrics/overview?from=${FROM}&to=${TO}`),
     ["metrics-overview", String(YEAR)],
     { tags: [CACHE_TAGS.goals, CACHE_TAGS.tasks], revalidate: 60 }
   );
@@ -26,7 +26,7 @@ async function fetchOverview(): Promise<MetricsOverview> {
 
 async function fetchGoalsByStatus(status: string): Promise<Goal[]> {
   return cachedFetch(
-    () => api.get<Goal[]>(`/api/v1/goals?status=${status}`),
+    () => serverApi.get<Goal[]>(`/api/v1/goals?status=${status}`),
     ["goals", status],
     { tags: [CACHE_TAGS.goals], revalidate: 60 }
   );

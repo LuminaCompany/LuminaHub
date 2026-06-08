@@ -2,13 +2,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/sidebar";
 import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/api.server";
 import type { Column } from "@/types";
 
 async function fetchProjectTaskCount(): Promise<number> {
   try {
     const projects = await cachedFetch(
-      () => api.get<{ id: string }[]>("/api/v1/projects"),
+      () => serverApi.get<{ id: string }[]>("/api/v1/projects"),
       ["layout-projects"],
       { tags: [CACHE_TAGS.projects], revalidate: 120 }
     );
@@ -17,7 +17,7 @@ async function fetchProjectTaskCount(): Promise<number> {
     const allColumns = await Promise.all(
       projects.map((p) =>
         cachedFetch(
-          () => api.get<Column[]>(`/api/v1/projects/${p.id}/columns`),
+          () => serverApi.get<Column[]>(`/api/v1/projects/${p.id}/columns`),
           ["layout-project-columns", p.id],
           { tags: [CACHE_TAGS.projects], revalidate: 120 }
         )
@@ -32,7 +32,7 @@ async function fetchProjectTaskCount(): Promise<number> {
 async function fetchInternalTaskCount(): Promise<number> {
   try {
     const columns = await cachedFetch(
-      () => api.get<Column[]>("/api/v1/columns/internal"),
+      () => serverApi.get<Column[]>("/api/v1/columns/internal"),
       ["layout-internal-columns"],
       { tags: [CACHE_TAGS.internalTasks], revalidate: 120 }
     );

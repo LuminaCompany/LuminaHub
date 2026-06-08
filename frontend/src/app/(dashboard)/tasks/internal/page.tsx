@@ -1,5 +1,5 @@
 import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/api.server";
 import type { Column } from "@/types";
 import { InternalPageClient } from "@/components/kanban/internal-page-client";
 
@@ -12,7 +12,7 @@ interface UserSummary {
 
 async function fetchInternalColumns(): Promise<Column[]> {
   return cachedFetch(
-    () => api.get<Column[]>("/api/v1/columns/internal"),
+    () => serverApi.get<Column[]>("/api/v1/columns/internal"),
     ["internal-columns"],
     { tags: [CACHE_TAGS.internalTasks], revalidate: 60 }
   );
@@ -20,7 +20,7 @@ async function fetchInternalColumns(): Promise<Column[]> {
 
 async function fetchUsers(): Promise<UserSummary[]> {
   return cachedFetch(
-    () => api.get<UserSummary[]>("/api/v1/auth/users"),
+    () => serverApi.get<UserSummary[]>("/api/v1/auth/users"),
     ["users-list"],
     { tags: [CACHE_TAGS.internalTasks], revalidate: 300 }
   );

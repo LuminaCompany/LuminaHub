@@ -1,5 +1,5 @@
 import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/api.server";
 import { HomeWidgets } from "@/components/home/home-widgets";
 import type { Goal, Task } from "@/types";
 
@@ -27,7 +27,7 @@ const MONTH = now.getMonth() + 1;
 async function fetchActiveGoals(): Promise<Goal[]> {
   try {
     return await cachedFetch(
-      () => api.get<Goal[]>("/api/v1/goals?status=active&limit=3"),
+      () => serverApi.get<Goal[]>("/api/v1/goals?status=active&limit=3"),
       ["home-goals-active"],
       { tags: [CACHE_TAGS.home, CACHE_TAGS.goals], revalidate: 60 }
     );
@@ -39,7 +39,7 @@ async function fetchActiveGoals(): Promise<Goal[]> {
 async function fetchPriorityTasks(): Promise<Task[]> {
   try {
     return await cachedFetch(
-      () => api.get<Task[]>("/api/v1/tasks?priority=high,urgent&limit=5"),
+      () => serverApi.get<Task[]>("/api/v1/tasks?priority=high,urgent&limit=5"),
       ["home-tasks-priority"],
       { tags: [CACHE_TAGS.home, CACHE_TAGS.tasks], revalidate: 60 }
     );
@@ -52,7 +52,7 @@ async function fetchFinanceSummary(): Promise<FinanceSummary | null> {
   try {
     return await cachedFetch(
       () =>
-        api.get<FinanceSummary>(
+        serverApi.get<FinanceSummary>(
           `/api/v1/finance/summary?period=month&year=${YEAR}&month=${MONTH}`
         ),
       ["home-finance-summary", String(YEAR), String(MONTH)],

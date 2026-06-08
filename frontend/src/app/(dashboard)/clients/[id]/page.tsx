@@ -3,7 +3,7 @@ import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
 import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/api.server";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ServiceForm } from "@/components/clients/service-form";
 import { PaymentForm } from "@/components/clients/payment-form";
@@ -30,7 +30,7 @@ interface ServicePaymentWithInstallments extends ServicePayment {
 async function fetchClientDetail(id: string): Promise<ClientDetail | null> {
   try {
     return await cachedFetch(
-      () => api.get<ClientDetail>(`/clients/${id}`),
+      () => serverApi.get<ClientDetail>(`/clients/${id}`),
       [`client-detail-${id}`],
       { tags: [CACHE_TAGS.clients, CACHE_TAGS.services], revalidate: 60 }
     );

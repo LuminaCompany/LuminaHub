@@ -1,5 +1,5 @@
 import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/api.server";
 import { FinanceDashboard } from "@/components/finance/finance-dashboard";
 import type { ChartDataPoint } from "@/components/finance/finance-chart";
 
@@ -33,7 +33,7 @@ const MONTH = now.getMonth() + 1;
 async function fetchSummary(): Promise<SummaryResponse> {
   return cachedFetch(
     () =>
-      api.get<SummaryResponse>(
+      serverApi.get<SummaryResponse>(
         `/api/v1/finance/summary?period=month&year=${YEAR}&month=${MONTH}`
       ),
     ["finance-summary", String(YEAR), String(MONTH)],
@@ -43,7 +43,7 @@ async function fetchSummary(): Promise<SummaryResponse> {
 
 async function fetchChart(): Promise<ChartDataPoint[]> {
   return cachedFetch(
-    () => api.get<ChartDataPoint[]>(`/api/v1/finance/chart?type=monthly&year=${YEAR}`),
+    () => serverApi.get<ChartDataPoint[]>(`/api/v1/finance/chart?type=monthly&year=${YEAR}`),
     ["finance-chart", String(YEAR)],
     { tags: [CACHE_TAGS.transactions], revalidate: 60 }
   );
@@ -51,7 +51,7 @@ async function fetchChart(): Promise<ChartDataPoint[]> {
 
 async function fetchProjection(): Promise<ProjectionResponse> {
   return cachedFetch(
-    () => api.get<ProjectionResponse>(`/api/v1/finance/projection?year=${YEAR}`),
+    () => serverApi.get<ProjectionResponse>(`/api/v1/finance/projection?year=${YEAR}`),
     ["finance-projection", String(YEAR)],
     { tags: [CACHE_TAGS.transactions], revalidate: 60 }
   );
@@ -60,7 +60,7 @@ async function fetchProjection(): Promise<ProjectionResponse> {
 async function fetchSplit(): Promise<SplitResponse> {
   return cachedFetch(
     () =>
-      api.get<SplitResponse>(
+      serverApi.get<SplitResponse>(
         `/api/v1/finance/split?from=${YEAR}-01-01&to=${YEAR}-12-31`
       ),
     ["finance-split", String(YEAR)],

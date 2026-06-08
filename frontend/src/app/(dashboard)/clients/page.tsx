@@ -1,5 +1,5 @@
 import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { api } from "@/lib/api";
+import { serverApi } from "@/lib/api.server";
 import { ClientsTable } from "@/components/clients/clients-table";
 import { ClientForm } from "@/components/clients/client-form";
 import type { Client } from "@/types";
@@ -10,7 +10,7 @@ interface ClientWithServiceCount extends Client {
 
 async function fetchClients(): Promise<ClientWithServiceCount[]> {
   return cachedFetch(
-    () => api.get<ClientWithServiceCount[]>("/clients"),
+    () => serverApi.get<ClientWithServiceCount[]>("/clients"),
     ["clients-list"],
     { tags: [CACHE_TAGS.clients], revalidate: 60 }
   );
