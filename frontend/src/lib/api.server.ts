@@ -61,6 +61,7 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
       id: data.id,
       name: data.name,
       email: data.email,
+      avatar_url: data.avatar_url ?? null,
       role: data.role ?? "collaborator",
       permissions: data.permissions ?? {},
     };

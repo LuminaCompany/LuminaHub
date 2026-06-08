@@ -25,6 +25,7 @@ export interface Profile {
   id: string
   name: string
   email: string
+  avatar_url: string | null
   role: Role
   permissions: PermissionMap
 }
@@ -44,6 +45,7 @@ export interface Goal {
   status: GoalStatus
   start_date: string
   target_date: string
+  visible_to_collaborators: boolean
   completed_at: string | null
   created_at: string
   updated_at: string

@@ -121,6 +121,26 @@ export function GoalCard({ goal, onComplete }: GoalCardProps) {
             >
               {STATUS_LABEL[goal.status] ?? goal.status}
             </span>
+
+            {/* Hidden-from-collaborators badge (only managers ever see such goals) */}
+            {goal.visible_to_collaborators === false && (
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  color: "var(--fg-2)",
+                  backgroundColor: "rgba(255,255,255,0.04)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "4px",
+                  padding: "2px 6px",
+                }}
+                title="Visível apenas para gestores"
+              >
+                Oculta
+              </span>
+            )}
           </div>
         </div>
       </div>

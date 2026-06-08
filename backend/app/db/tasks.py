@@ -5,7 +5,8 @@ from supabase._async.client import AsyncClient
 from app.models.tasks import TaskCreate, TaskMove, TaskUpdate
 
 _TABLE = "tasks"
-_TASK_SELECT = "*, assignee:users(*)"
+# Embed assignee WITHOUT email — collaborators must not receive others' emails.
+_TASK_SELECT = "*, assignee:users(id, name, avatar_url)"
 
 
 async def db_list_tasks(

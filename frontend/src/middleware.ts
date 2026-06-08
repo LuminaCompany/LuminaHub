@@ -97,10 +97,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Role/permission gating for authenticated users on guarded routes.
-  const needsSettings = pathname === "/settings" || pathname.startsWith("/settings/");
+  // Permission gating for authenticated users on resource-guarded tabs.
+  // (Configurações is open to everyone — collaborators just see fewer options.)
   const guardedResource = resourceForPath(pathname);
-  if (user && (needsSettings || guardedResource)) {
+  if (user && guardedResource) {
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -108,15 +108,7 @@ export async function middleware(request: NextRequest) {
     const profile = token ? await fetchProfile(token) : null;
     const isManager = profile?.role === "manager";
 
-    // Configurações is manager-only.
-    if (needsSettings && !isManager) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/home";
-      return NextResponse.redirect(url);
-    }
-
-    // Tab access requires `view` on the mapped resource (managers bypass).
-    if (guardedResource && !isManager) {
+    if (!isManager) {
       const canView = Boolean(profile?.permissions?.[guardedResource]?.view);
       if (!canView) {
         const url = request.nextUrl.clone();

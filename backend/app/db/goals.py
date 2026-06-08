@@ -15,6 +15,7 @@ async def db_list_goals(
     status: str | None,
     date_from: date | None,
     date_to: date | None,
+    visible_only: bool = False,
 ) -> list[dict]:
     query = sb.table(_TABLE).select("*")
     if status:
@@ -23,6 +24,8 @@ async def db_list_goals(
         query = query.gte("target_date", date_from.isoformat())
     if date_to:
         query = query.lte("target_date", date_to.isoformat())
+    if visible_only:
+        query = query.eq("visible_to_collaborators", True)
     query = query.order("created_at", desc=True)
     response = await query.execute()
     return response.data or []

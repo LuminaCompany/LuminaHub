@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getProfile, serverFetch } from "@/lib/api.server";
 import { SettingsClient } from "@/components/settings/settings-client";
+import { ProfileCard } from "@/components/settings/profile-card";
 import type { User } from "@/types";
 
 export interface CatalogEntry {
@@ -10,14 +11,19 @@ export interface CatalogEntry {
 
 export default async function SettingsPage() {
   const profile = await getProfile();
-  if (!profile || profile.role !== "manager") {
+  if (!profile) {
     redirect("/home");
   }
 
-  const [users, catalog] = await Promise.all([
-    serverFetch<User[]>("/api/v1/admin/users", { revalidate: 0 }),
-    serverFetch<CatalogEntry[]>("/api/v1/admin/catalog", { revalidate: 0 }),
-  ]);
+  const isManager = profile.role === "manager";
+
+  // User management data is only loaded for managers.
+  const [users, catalog] = isManager
+    ? await Promise.all([
+        serverFetch<User[]>("/api/v1/admin/users", { revalidate: 0 }),
+        serverFetch<CatalogEntry[]>("/api/v1/admin/catalog", { revalidate: 0 }),
+      ])
+    : [[], []];
 
   return (
     <div className="flex flex-col gap-6">
@@ -29,15 +35,21 @@ export default async function SettingsPage() {
           Configurações
         </h1>
         <p className="text-sm mt-1" style={{ color: "var(--fg-3)" }}>
-          Gerencie usuários, papéis e permissões de acesso.
+          {isManager
+            ? "Gerencie seu perfil, usuários e permissões de acesso."
+            : "Gerencie seu perfil."}
         </p>
       </div>
 
-      <SettingsClient
-        users={users}
-        catalog={catalog}
-        currentUserId={profile.id}
-      />
+      <ProfileCard profile={profile} />
+
+      {isManager && (
+        <SettingsClient
+          users={users}
+          catalog={catalog}
+          currentUserId={profile.id}
+        />
+      )}
     </div>
   );
 }

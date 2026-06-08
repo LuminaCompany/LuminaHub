@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,7 @@ const schema = z
     auto_source: z.boolean().optional(),
     start_date: z.string().min(1, "Data inicial obrigatória"),
     target_date: z.string().min(1, "Data meta obrigatória"),
+    visible_to_collaborators: z.boolean().optional(),
   })
   .refine(
     (d) => {
@@ -67,11 +69,16 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { type: "numerical", auto_source: false },
+    defaultValues: {
+      type: "numerical",
+      auto_source: false,
+      visible_to_collaborators: true,
+    },
   });
 
   const type = watch("type");
   const autoSource = watch("auto_source");
+  const visibleToCollaborators = watch("visible_to_collaborators");
 
   async function onSubmit(values: FormValues) {
     setLoading(true);
@@ -88,6 +95,7 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
           values.type === "numerical" && values.target_value
             ? parseFloat(values.target_value)
             : null,
+        visible_to_collaborators: values.visible_to_collaborators ?? true,
       };
       await api.post("/api/v1/goals", payload);
       await revalidateGoalsAction();
@@ -196,6 +204,37 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
                 <span style={{ color: "#E55050", fontSize: "11px" }}>{errors.target_date.message}</span>
               )}
             </div>
+          </div>
+
+          {/* Visibility to collaborators */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+              padding: "10px 12px",
+              borderRadius: "8px",
+              backgroundColor: "var(--surface-2)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+              <span style={{ fontSize: "13px", color: "var(--fg-1)", fontWeight: 500 }}>
+                Visível para colaboradores
+              </span>
+              <span style={{ fontSize: "11px", color: "var(--fg-3)" }}>
+                {visibleToCollaborators
+                  ? "Colaboradores com acesso a Métricas veem esta meta"
+                  : "Apenas gestores verão esta meta"}
+              </span>
+            </div>
+            <Switch
+              checked={visibleToCollaborators ?? true}
+              onCheckedChange={(v: boolean) =>
+                setValue("visible_to_collaborators", v)
+              }
+            />
           </div>
 
           {/* Description */}

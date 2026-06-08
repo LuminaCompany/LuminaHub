@@ -19,10 +19,10 @@ import {
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { can, isManager } from "@/lib/permissions";
+import { can } from "@/lib/permissions";
 import type { PermResource, Profile } from "@/types";
 import type { User } from "@supabase/supabase-js";
 
@@ -386,12 +386,15 @@ function SidebarContent({
   onNavClick,
 }: SidebarProps & { collapsed?: boolean; onNavClick?: () => void }) {
   const navItems = buildNavItems(profile, projectCount, internalTaskCount);
-  const showSettings = isManager(profile?.role);
+  // Configurações is open to everyone; collaborators just see fewer options inside.
+  const showSettings = true;
 
   const displayName =
+    profile?.name ??
     user?.user_metadata?.full_name ??
     user?.email?.split("@")[0] ??
     "Usuário";
+  const avatarUrl = profile?.avatar_url ?? null;
 
   const initials = displayName
     .split(" ")
@@ -491,6 +494,7 @@ function SidebarContent({
             <TooltipTrigger>
               <div className="flex justify-center">
                 <Avatar className="h-8 w-8 shrink-0 cursor-default">
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
                   <AvatarFallback
                     style={{
                       backgroundColor: "rgba(0,234,255,0.12)",
@@ -514,6 +518,7 @@ function SidebarContent({
             style={{ backgroundColor: "rgba(255,255,255,0.03)" }}
           >
             <Avatar className="h-8 w-8 shrink-0">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
               <AvatarFallback
                 style={{
                   backgroundColor: "rgba(0,234,255,0.12)",

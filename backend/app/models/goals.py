@@ -16,6 +16,7 @@ class GoalCreate(BaseModel):
     auto_source: Literal["revenue"] | None = None
     start_date: date
     target_date: date
+    visible_to_collaborators: bool = True
 
     @model_validator(mode="after")
     def validate_numerical_fields(self) -> "GoalCreate":
@@ -33,6 +34,7 @@ class GoalUpdate(BaseModel):
     auto_source: Literal["revenue"] | None = None
     start_date: date | None = None
     target_date: date | None = None
+    visible_to_collaborators: bool | None = None
 
 
 class GoalResponse(BaseModel):
@@ -48,6 +50,7 @@ class GoalResponse(BaseModel):
     status: str
     start_date: date
     target_date: date
+    visible_to_collaborators: bool
     completed_at: datetime | None
     created_at: datetime
     updated_at: datetime

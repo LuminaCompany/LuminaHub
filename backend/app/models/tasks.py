@@ -40,7 +40,9 @@ class UserSummary(BaseModel):
 
     id: uuid.UUID
     name: str
-    email: str
+    # Email intentionally excluded from embedded assignee data so collaborators
+    # never receive other users' emails. Kept optional for compatibility.
+    email: str | None = None
     avatar_url: str | None
 
 

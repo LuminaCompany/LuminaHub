@@ -26,12 +26,19 @@ class GoalService:
         status: str | None = None,
         date_from: str | None = None,
         date_to: str | None = None,
+        is_manager: bool = True,
     ) -> list[GoalResponse]:
         from datetime import date
 
         df = date.fromisoformat(date_from) if date_from else None
         dt = date.fromisoformat(date_to) if date_to else None
-        rows = await db_list_goals(self._sb, status=status, date_from=df, date_to=dt)
+        rows = await db_list_goals(
+            self._sb,
+            status=status,
+            date_from=df,
+            date_to=dt,
+            visible_only=not is_manager,
+        )
         goals = [GoalResponse.model_validate(r) for r in rows]
         for i, row in enumerate(rows):
             if row.get("auto_source") == "revenue":
@@ -43,9 +50,12 @@ class GoalService:
         row = await db_create_goal(self._sb, payload)
         return GoalResponse.model_validate(row)
 
-    async def get_goal(self, goal_id: str) -> GoalResponse:
+    async def get_goal(self, goal_id: str, is_manager: bool = True) -> GoalResponse:
         row = await db_get_goal(self._sb, goal_id)
         if not row:
+            raise NotFoundError(f"Goal {goal_id} not found")
+        # Collaborators must not see goals hidden from them — treat as not found.
+        if not is_manager and not row.get("visible_to_collaborators", True):
             raise NotFoundError(f"Goal {goal_id} not found")
         goal = GoalResponse.model_validate(row)
         if row.get("auto_source") == "revenue":
@@ -53,9 +63,13 @@ class GoalService:
             goal = goal.model_copy(update={"current_value": computed})
         return goal
 
-    async def update_goal(self, goal_id: str, payload: GoalUpdate) -> GoalResponse:
+    async def update_goal(
+        self, goal_id: str, payload: GoalUpdate, is_manager: bool = True
+    ) -> GoalResponse:
         row = await db_get_goal(self._sb, goal_id)
         if not row:
+            raise NotFoundError(f"Goal {goal_id} not found")
+        if not is_manager and not row.get("visible_to_collaborators", True):
             raise NotFoundError(f"Goal {goal_id} not found")
         resolved_type = payload.type or row.get("type")
         resolved_tv = payload.target_value if payload.target_value is not None else row.get("target_value")
@@ -64,9 +78,11 @@ class GoalService:
         updated = await db_update_goal(self._sb, goal_id, payload)
         return GoalResponse.model_validate(updated)
 
-    async def complete_goal(self, goal_id: str) -> GoalResponse:
+    async def complete_goal(self, goal_id: str, is_manager: bool = True) -> GoalResponse:
         row = await db_get_goal(self._sb, goal_id)
         if not row:
+            raise NotFoundError(f"Goal {goal_id} not found")
+        if not is_manager and not row.get("visible_to_collaborators", True):
             raise NotFoundError(f"Goal {goal_id} not found")
         if row["status"] != "active":
             raise ValidationError("Only active goals can be completed")
@@ -85,8 +101,10 @@ class GoalService:
         updated = await db_set_goal_status(self._sb, goal_id, "cancelled")
         return GoalResponse.model_validate(updated)
 
-    async def delete_goal(self, goal_id: str) -> None:
+    async def delete_goal(self, goal_id: str, is_manager: bool = True) -> None:
         row = await db_get_goal(self._sb, goal_id)
         if not row:
+            raise NotFoundError(f"Goal {goal_id} not found")
+        if not is_manager and not row.get("visible_to_collaborators", True):
             raise NotFoundError(f"Goal {goal_id} not found")
         await db_delete_goal(self._sb, goal_id)
