@@ -77,7 +77,6 @@ export default async function ProjectsPage() {
               + Novo Projeto
             </Button>
           }
-          onCreated={() => {}}
         />
       </div>
 

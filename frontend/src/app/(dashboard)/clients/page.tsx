@@ -9,10 +9,11 @@ interface ClientWithServiceCount extends Client {
 }
 
 async function fetchClients(): Promise<ClientWithServiceCount[]> {
-  return serverFetch<ClientWithServiceCount[]>("/clients", {
+  const res = await serverFetch<{ data: ClientWithServiceCount[] }>("/api/v1/clients", {
     tags: [CACHE_TAGS.clients],
     revalidate: 60,
   });
+  return res.data ?? [];
 }
 
 export default async function ClientsPage() {

@@ -31,10 +31,11 @@ async function fetchActiveGoals(): Promise<Goal[]> {
 
 async function fetchPriorityTasks(): Promise<Task[]> {
   try {
-    return await serverFetch<Task[]>("/api/v1/tasks?priority=high,urgent&limit=5", {
+    const res = await serverFetch<{ data: Task[] }>("/api/v1/tasks?priority=high,urgent&limit=5", {
       tags: [CACHE_TAGS.home, CACHE_TAGS.tasks],
       revalidate: 60,
     });
+    return res.data ?? [];
   } catch {
     return [];
   }

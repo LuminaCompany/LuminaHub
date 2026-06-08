@@ -29,7 +29,7 @@ interface ServicePaymentWithInstallments extends ServicePayment {
 
 async function fetchClientDetail(id: string): Promise<ClientDetail | null> {
   try {
-    return await serverFetch<ClientDetail>(`/clients/${id}`, {
+    return await serverFetch<ClientDetail>(`/api/v1/clients/${id}`, {
       tags: [CACHE_TAGS.clients, CACHE_TAGS.services],
       revalidate: 60,
     });
