@@ -1,4 +1,5 @@
 import type {
+  HomeCardKey,
   PermAction,
   PermResource,
   PermissionMap,
@@ -54,6 +55,26 @@ export function can(
   if (action === "view" && ALWAYS_VIEWABLE.includes(resource)) return true;
   const entry = profile.permissions?.[resource];
   return Boolean(entry?.[action]);
+}
+
+// ─── Home cards ────────────────────────────────────────────────────────────────
+
+export const HOME_CARDS: HomeCardKey[] = ["goals", "tasks", "finance"];
+
+export const HOME_CARD_LABELS: Record<HomeCardKey, string> = {
+  goals: "Metas Ativas",
+  tasks: "Tarefas Prioritárias",
+  finance: "Receita do Mês",
+};
+
+/** Resolve whether a profile may see a given Home card (managers see all). */
+export function canSeeHomeCard(
+  profile: Pick<Profile, "role" | "home_cards"> | null | undefined,
+  card: HomeCardKey
+): boolean {
+  if (!profile) return false;
+  if (profile.role === "manager") return true;
+  return profile.home_cards?.[card] !== false;
 }
 
 /** Build an empty permission map (every action false) for the editable matrix. */

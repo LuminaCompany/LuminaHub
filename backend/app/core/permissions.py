@@ -49,6 +49,15 @@ PERMISSION_CATALOG: dict[Resource, list[Action]] = {
 # or permission map.
 _ALWAYS_VIEWABLE: frozenset[Resource] = frozenset({Resource.HOME})
 
+# Home dashboard cards a manager can toggle per collaborator (independent of tabs).
+HOME_CARDS: tuple[str, ...] = ("goals", "tasks", "finance")
+
+
+def normalize_home_cards(raw: object) -> dict[str, bool]:
+    """Sanitize a home_cards map against the known cards (defaults to visible)."""
+    data = raw if isinstance(raw, dict) else {}
+    return {card: bool(data.get(card, True)) for card in HOME_CARDS}
+
 
 def catalog_payload() -> list[dict]:
     """Serialize the catalog for the frontend (stable, ordered)."""

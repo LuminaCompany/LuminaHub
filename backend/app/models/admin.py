@@ -27,6 +27,7 @@ class AdminUserUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1)
     role: Literal["manager", "collaborator"] | None = None
     permissions: dict | None = None
+    home_cards: dict | None = None
 
 
 class AdminUserResponse(BaseModel):
@@ -38,5 +39,6 @@ class AdminUserResponse(BaseModel):
     avatar_url: str | None = None
     role: str
     permissions: dict
+    home_cards: dict = Field(default_factory=dict)
     created_at: datetime
     updated_at: datetime

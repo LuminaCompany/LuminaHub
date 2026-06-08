@@ -20,11 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { UserCreateDialog } from "@/components/settings/user-create-dialog";
 import { PermissionsMatrix } from "@/components/settings/permissions-matrix";
-import { emptyPermissionMap } from "@/lib/permissions";
+import {
+  emptyPermissionMap,
+  HOME_CARDS,
+  HOME_CARD_LABELS,
+} from "@/lib/permissions";
 import { api, ApiError } from "@/lib/api";
-import type { PermissionMap, Role, User } from "@/types";
+import type { HomeCards, PermissionMap, Role, User } from "@/types";
 import type { CatalogEntry } from "@/app/(dashboard)/settings/page";
 
 interface SettingsClientProps {
@@ -206,6 +211,11 @@ function PermissionsEditor({
     ...emptyPermissionMap(),
     ...(user.permissions ?? {}),
   }));
+  const [homeCards, setHomeCards] = useState<HomeCards>(() => ({
+    goals: user.home_cards?.goals ?? true,
+    tasks: user.home_cards?.tasks ?? true,
+    finance: user.home_cards?.finance ?? true,
+  }));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -216,6 +226,7 @@ function PermissionsEditor({
       await api.patch(`/api/v1/admin/users/${user.id}`, {
         role,
         permissions: role === "manager" ? {} : perms,
+        home_cards: homeCards,
       });
       onSaved();
     } catch (e) {
@@ -267,12 +278,43 @@ function PermissionsEditor({
           individual é necessária.
         </p>
       ) : (
-        <PermissionsMatrix
-          catalog={catalog}
-          value={perms}
-          onChange={setPerms}
-          disabled={saving}
-        />
+        <>
+          <PermissionsMatrix
+            catalog={catalog}
+            value={perms}
+            onChange={setPerms}
+            disabled={saving}
+          />
+
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium" style={{ color: "var(--fg-1)" }}>
+              Cards da Home
+            </span>
+            <div
+              className="rounded-lg border divide-y"
+              style={{ borderColor: "var(--border)" }}
+            >
+              {HOME_CARDS.map((card) => (
+                <div
+                  key={card}
+                  className="flex items-center justify-between px-3 py-2"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <span className="text-sm" style={{ color: "var(--fg-2)" }}>
+                    {HOME_CARD_LABELS[card]}
+                  </span>
+                  <Switch
+                    checked={homeCards[card]}
+                    onCheckedChange={(v: boolean) =>
+                      setHomeCards((prev) => ({ ...prev, [card]: v }))
+                    }
+                    disabled={saving}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
       {error && (

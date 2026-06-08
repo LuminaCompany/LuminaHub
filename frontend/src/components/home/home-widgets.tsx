@@ -399,9 +399,27 @@ interface HomeWidgetsProps {
   goals: Goal[];
   tasks: Task[];
   financeSummary: FinanceSummary | null;
+  /** Which cards to render — controlled per collaborator by a manager. */
+  show?: { goals: boolean; tasks: boolean; finance: boolean };
 }
 
-export function HomeWidgets({ goals, tasks, financeSummary }: HomeWidgetsProps) {
+export function HomeWidgets({ goals, tasks, financeSummary, show }: HomeWidgetsProps) {
+  const visible = show ?? { goals: true, tasks: true, finance: true };
+
+  if (!visible.goals && !visible.tasks && !visible.finance) {
+    return (
+      <p
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "13px",
+          color: "var(--fg-3)",
+        }}
+      >
+        Nenhum card disponível na sua Home.
+      </p>
+    );
+  }
+
   return (
     <div
       style={{
@@ -410,9 +428,9 @@ export function HomeWidgets({ goals, tasks, financeSummary }: HomeWidgetsProps) 
         gap: "20px",
       }}
     >
-      <GoalsWidget goals={goals} />
-      <TasksWidget tasks={tasks} />
-      <FinanceWidget financeSummary={financeSummary} />
+      {visible.goals && <GoalsWidget goals={goals} />}
+      {visible.tasks && <TasksWidget tasks={tasks} />}
+      {visible.finance && <FinanceWidget financeSummary={financeSummary} />}
     </div>
   );
 }

@@ -1,5 +1,6 @@
-import { serverFetch } from "@/lib/api.server";
+import { serverFetch, getProfile } from "@/lib/api.server";
 import { CACHE_TAGS } from "@/lib/cache";
+import { canSeeHomeCard } from "@/lib/permissions";
 import { HomeWidgets } from "@/components/home/home-widgets";
 import type { Goal, Task } from "@/types";
 
@@ -62,10 +63,20 @@ function formatHeroDate(): string {
 }
 
 export default async function HomePage() {
+  const profile = await getProfile();
+
+  // Manager configures which Home cards each collaborator sees. Skip fetching
+  // data for hidden cards entirely.
+  const show = {
+    goals: canSeeHomeCard(profile, "goals"),
+    tasks: canSeeHomeCard(profile, "tasks"),
+    finance: canSeeHomeCard(profile, "finance"),
+  };
+
   const [goals, tasks, financeSummary] = await Promise.all([
-    fetchActiveGoals(),
-    fetchPriorityTasks(),
-    fetchFinanceSummary(),
+    show.goals ? fetchActiveGoals() : Promise.resolve([]),
+    show.tasks ? fetchPriorityTasks() : Promise.resolve([]),
+    show.finance ? fetchFinanceSummary() : Promise.resolve(null),
   ]);
 
   const heroDate = formatHeroDate();
@@ -140,6 +151,7 @@ export default async function HomePage() {
         goals={goals}
         tasks={tasks}
         financeSummary={financeSummary}
+        show={show}
       />
     </div>
   );

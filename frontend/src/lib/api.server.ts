@@ -64,6 +64,11 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
       avatar_url: data.avatar_url ?? null,
       role: data.role ?? "collaborator",
       permissions: data.permissions ?? {},
+      home_cards: {
+        goals: data.home_cards?.goals ?? true,
+        tasks: data.home_cards?.tasks ?? true,
+        finance: data.home_cards?.finance ?? true,
+      },
     };
   } catch {
     return null;

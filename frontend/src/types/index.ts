@@ -9,6 +9,10 @@ export type PermissionMap = Partial<
   Record<PermResource, Partial<Record<PermAction, boolean>>>
 >
 
+/** Home dashboard cards a manager can toggle per collaborator. */
+export type HomeCardKey = "goals" | "tasks" | "finance"
+export type HomeCards = Record<HomeCardKey, boolean>
+
 export interface User {
   id: string
   name: string
@@ -16,6 +20,7 @@ export interface User {
   avatar_url: string | null
   role: Role
   permissions: PermissionMap
+  home_cards: HomeCards
   created_at: string
   updated_at: string
 }
@@ -28,6 +33,7 @@ export interface Profile {
   avatar_url: string | null
   role: Role
   permissions: PermissionMap
+  home_cards: HomeCards
 }
 
 // ── Goals ──

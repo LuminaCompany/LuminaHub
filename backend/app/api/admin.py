@@ -6,13 +6,16 @@ from fastapi import APIRouter, Depends
 
 from app.core.auth import Principal, require_manager
 from app.core.exceptions import AppError, NotFoundError, ValidationError
-from app.core.permissions import catalog_payload, normalize
+from app.core.permissions import catalog_payload, normalize, normalize_home_cards
 from app.db.client import get_supabase
 from app.models.admin import AdminUserCreate, AdminUserResponse, AdminUserUpdate
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
-_USER_COLUMNS = "id, name, email, avatar_url, role, permissions, created_at, updated_at"
+_USER_COLUMNS = (
+    "id, name, email, avatar_url, role, permissions, home_cards, "
+    "created_at, updated_at"
+)
 
 
 @router.get("/catalog")
@@ -105,6 +108,9 @@ async def update_user(
             target_role = (existing.data or {}).get("role", "collaborator")
         if target_role != "manager":
             updates["permissions"] = normalize(payload.permissions)
+
+    if payload.home_cards is not None:
+        updates["home_cards"] = normalize_home_cards(payload.home_cards)
 
     if not updates:
         raise ValidationError("No fields to update")
