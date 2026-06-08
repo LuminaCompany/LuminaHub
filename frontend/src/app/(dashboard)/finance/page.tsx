@@ -1,4 +1,4 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache";
+import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
 import { api } from "@/lib/api";
 import { FinanceDashboard } from "@/components/finance/finance-dashboard";
 import type { ChartDataPoint } from "@/components/finance/finance-chart";

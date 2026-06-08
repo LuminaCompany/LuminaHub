@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache";
+import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
 import { api } from "@/lib/api";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ServiceForm } from "@/components/clients/service-form";

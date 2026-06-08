@@ -1,4 +1,4 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache";
+import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
 import { api } from "@/lib/api";
 import { ClientsTable } from "@/components/clients/clients-table";
 import { ClientForm } from "@/components/clients/client-form";

@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import { revalidateGoals } from "@/lib/cache";
+import { revalidateGoalsAction } from "@/actions/cache";
 
 const schema = z
   .object({
@@ -90,7 +90,7 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
             : null,
       };
       await api.post("/api/v1/goals", payload);
-      revalidateGoals();
+      await revalidateGoalsAction();
       reset();
       setOpen(false);
       onSuccess?.();

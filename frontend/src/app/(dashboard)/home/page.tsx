@@ -1,4 +1,4 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache";
+import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
 import { api } from "@/lib/api";
 import { HomeWidgets } from "@/components/home/home-widgets";
 import type { Goal, Task } from "@/types";

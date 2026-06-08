@@ -1,4 +1,4 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache";
+import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
 import { api } from "@/lib/api";
 import type { Column } from "@/types";
 import { InternalPageClient } from "@/components/kanban/internal-page-client";

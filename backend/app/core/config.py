@@ -13,5 +13,9 @@ class Settings(BaseSettings):
     SUPABASE_JWT_SECRET: str
     FRONTEND_URL: str = "http://localhost:3000"
 
+    @property
+    def cors_origins(self) -> list[str]:
+        return [o.strip() for o in self.FRONTEND_URL.split(",") if o.strip()]
+
 
 settings = Settings()
