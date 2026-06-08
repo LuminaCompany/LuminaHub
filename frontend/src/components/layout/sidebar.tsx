@@ -80,7 +80,7 @@ function buildNavItems(
       resource: "tasks",
       children: [
         {
-          label: "Projetos",
+          label: "Projetos em Andamento",
           href: "/tasks/projects",
           badge: projectCount > 0 ? String(projectCount) : undefined,
         },

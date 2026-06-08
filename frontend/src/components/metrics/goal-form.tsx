@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { revalidateGoalsAction } from "@/actions/cache";
+import type { Goal } from "@/types";
 
 const schema = z
   .object({
@@ -53,10 +54,19 @@ type FormValues = z.infer<typeof schema>;
 interface GoalFormProps {
   onSuccess?: () => void;
   trigger?: React.ReactNode;
+  /** When provided, the form edits this goal instead of creating a new one. */
+  goal?: Goal | null;
+  /** Controlled open state — used for edit dialogs opened from outside. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
-  const [open, setOpen] = useState(false);
+export function GoalForm({ onSuccess, trigger, goal, open: openProp, onOpenChange }: GoalFormProps) {
+  const isEdit = !!goal;
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = onOpenChange ?? setOpenState;
+  const isControlled = openProp !== undefined;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,11 +79,22 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      type: "numerical",
-      auto_source: false,
-      visible_to_collaborators: true,
-    },
+    defaultValues: goal
+      ? {
+          name: goal.name,
+          description: goal.description ?? "",
+          type: goal.type,
+          target_value: goal.target_value != null ? String(goal.target_value) : "",
+          auto_source: goal.auto_source === "revenue",
+          start_date: goal.start_date.slice(0, 10),
+          target_date: goal.target_date.slice(0, 10),
+          visible_to_collaborators: goal.visible_to_collaborators,
+        }
+      : {
+          type: "numerical",
+          auto_source: false,
+          visible_to_collaborators: true,
+        },
   });
 
   const type = watch("type");
@@ -97,9 +118,13 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
             : null,
         visible_to_collaborators: values.visible_to_collaborators ?? true,
       };
-      await api.post("/api/v1/goals", payload);
+      if (isEdit && goal) {
+        await api.patch(`/api/v1/goals/${goal.id}`, payload);
+      } else {
+        await api.post("/api/v1/goals", payload);
+      }
       await revalidateGoalsAction();
-      reset();
+      if (!isEdit) reset();
       setOpen(false);
       onSuccess?.();
     } catch (e: unknown) {
@@ -117,17 +142,19 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        {trigger ?? (
-          <Button variant="default" size="sm">
-            Nova Meta
-          </Button>
-        )}
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger>
+          {trigger ?? (
+            <Button variant="default" size="sm">
+              Nova Meta
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent style={{ backgroundColor: "var(--surface)", maxWidth: "480px" }}>
         <DialogHeader>
           <DialogTitle style={{ fontFamily: "var(--font-display)", color: "var(--fg)" }}>
-            Nova Meta
+            {isEdit ? "Editar Meta" : "Nova Meta"}
           </DialogTitle>
         </DialogHeader>
 
@@ -143,7 +170,7 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
           <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             <Label style={{ color: "var(--fg-2)", fontSize: "12px" }}>Tipo</Label>
             <Select
-              defaultValue="numerical"
+              defaultValue={goal?.type ?? "numerical"}
               onValueChange={(v) => setValue("type", v as "numerical" | "symbolic")}
             >
               <SelectTrigger style={{ ...inputStyle, width: "100%" }}>
@@ -254,7 +281,7 @@ export function GoalForm({ onSuccess, trigger }: GoalFormProps) {
 
           <DialogFooter style={{ marginTop: "4px" }}>
             <Button type="submit" disabled={loading} variant="default">
-              {loading ? "Salvando..." : "Criar Meta"}
+              {loading ? "Salvando..." : isEdit ? "Salvar" : "Criar Meta"}
             </Button>
           </DialogFooter>
         </form>

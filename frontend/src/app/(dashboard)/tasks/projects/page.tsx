@@ -58,7 +58,7 @@ export default async function ProjectsPage() {
             className="text-2xl font-bold tracking-wide"
             style={{ fontFamily: "var(--font-display)", color: "var(--fg)" }}
           >
-            Projetos
+            Projetos em Andamento
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--fg-2)" }}>
             {projectsWithColumns.length}{" "}

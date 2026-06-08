@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Progress, ProgressTrack, ProgressIndicator } from "@/components/ui/progress";
 import type { Goal } from "@/types";
 
 interface GoalCardProps {
   goal: Goal;
   onComplete?: (id: string) => void;
+  onEdit?: (goal: Goal) => void;
+  onDelete?: (goal: Goal) => void;
 }
 
 function formatDate(iso: string) {
@@ -37,12 +41,16 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: "var(--fg-3)",
 };
 
-export function GoalCard({ goal, onComplete }: GoalCardProps) {
+export function GoalCard({ goal, onComplete, onEdit, onDelete }: GoalCardProps) {
   const pct = progressPercent(goal);
   const isCompleted = goal.status === "completed";
+  const [hovered, setHovered] = useState(false);
+  const showActions = !!onEdit || !!onDelete;
 
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
@@ -51,6 +59,7 @@ export function GoalCard({ goal, onComplete }: GoalCardProps) {
         display: "flex",
         flexDirection: "column",
         gap: "12px",
+        position: "relative",
       }}
     >
       {/* Header row */}
@@ -143,6 +152,54 @@ export function GoalCard({ goal, onComplete }: GoalCardProps) {
             )}
           </div>
         </div>
+
+        {/* Edit / delete actions — appear on hover */}
+        {showActions && (
+          <div
+            style={{
+              display: "flex",
+              gap: "4px",
+              opacity: hovered ? 1 : 0,
+              transition: "opacity 0.15s",
+              pointerEvents: hovered ? "auto" : "none",
+            }}
+          >
+            {onEdit && (
+              <button
+                onClick={() => onEdit(goal)}
+                title="Editar meta"
+                style={{
+                  display: "flex",
+                  padding: "4px",
+                  borderRadius: "6px",
+                  color: "var(--fg-2)",
+                  backgroundColor: "var(--surface-2)",
+                  border: "1px solid var(--border)",
+                  cursor: "pointer",
+                }}
+              >
+                <Pencil size={14} />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => onDelete(goal)}
+                title="Excluir meta"
+                style={{
+                  display: "flex",
+                  padding: "4px",
+                  borderRadius: "6px",
+                  color: "var(--negative)",
+                  backgroundColor: "var(--surface-2)",
+                  border: "1px solid var(--border)",
+                  cursor: "pointer",
+                }}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Description */}

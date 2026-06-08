@@ -80,6 +80,12 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
     refresh();
   }
 
+  async function handleDeleteProject() {
+    if (!confirm(`Excluir o projeto "${projectName}" e todas as suas colunas e tarefas?`)) return;
+    await api.delete(`/api/v1/projects/${projectId}`);
+    refresh();
+  }
+
   async function handleRenameColumn(columnId: string, name: string) {
     await api.patch(`/api/v1/columns/${columnId}`, { name });
     refresh();
@@ -113,6 +119,7 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
         filters={filters}
         onFiltersChange={setFilters}
         onRename={handleRenameProject}
+        onDelete={handleDeleteProject}
       />
 
       <div className="flex gap-4 overflow-x-auto pb-6">

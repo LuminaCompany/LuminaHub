@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Check, X } from "lucide-react";
+import { Pencil, Check, X, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface FilterState {
@@ -16,6 +16,7 @@ interface ProjectHeaderProps {
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
   onRename: (name: string) => void;
+  onDelete: () => void;
 }
 
 export function ProjectHeader({
@@ -24,6 +25,7 @@ export function ProjectHeader({
   filters,
   onFiltersChange,
   onRename,
+  onDelete,
 }: ProjectHeaderProps) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
@@ -88,6 +90,16 @@ export function ProjectHeader({
           </button>
         )}
 
+        {!editing && (
+          <button
+            onClick={onDelete}
+            className="p-1 rounded opacity-40 hover:opacity-100 transition-opacity"
+            style={{ color: "var(--negative)" }}
+            title="Excluir projeto"
+          >
+            <Trash2 size={15} />
+          </button>
+        )}
       </div>
 
       {/* Filter row */}
