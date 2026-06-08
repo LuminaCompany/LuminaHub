@@ -24,7 +24,8 @@ async def db_list_tasks(
     if assignee_id:
         query = query.eq("assignee_id", assignee_id)
     if priority:
-        query = query.eq("priority", priority)
+        priorities = [p.strip() for p in priority.split(",") if p.strip()]
+        query = query.in_("priority", priorities)
     if tag:
         query = query.contains("tags", [tag])
     query = query.order("position").range(offset, offset + limit - 1)

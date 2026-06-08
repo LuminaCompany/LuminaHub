@@ -99,7 +99,7 @@ export function ContractUpload({ clientId, trigger }: ContractUploadProps) {
 
       if (uploadError) throw new Error(uploadError.message);
 
-      await api.post("/contracts", {
+      await api.post("/api/v1/contracts", {
         client_id: clientId,
         name: displayName.trim(),
         file_path: filePath,
@@ -131,7 +131,7 @@ export function ContractUpload({ clientId, trigger }: ContractUploadProps) {
     setServerError(null);
 
     try {
-      await api.post("/contracts", {
+      await api.post("/api/v1/contracts", {
         client_id: clientId,
         name: urlName.trim(),
         file_path: null,

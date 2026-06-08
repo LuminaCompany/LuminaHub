@@ -82,9 +82,9 @@ export function ServiceForm({ clientId, service, trigger }: ServiceFormProps) {
     setServerError(null);
     try {
       if (isEditing && service) {
-        await api.patch(`/services/${service.id}`, data);
+        await api.patch(`/api/v1/services/${service.id}`, data);
       } else {
-        await api.post("/services", data);
+        await api.post("/api/v1/services", data);
       }
       setOpen(false);
       reset();

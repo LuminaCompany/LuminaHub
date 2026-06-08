@@ -71,7 +71,7 @@ export function PaymentForm({ serviceId, trigger }: PaymentFormProps) {
   async function onSubmit(data: PaymentFormData) {
     setServerError(null);
     try {
-      await api.post("/payments", data);
+      await api.post("/api/v1/service-payments", data);
       setOpen(false);
       reset();
       router.refresh();

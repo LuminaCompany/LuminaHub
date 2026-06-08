@@ -93,7 +93,7 @@ function MarkPaidButton({ installmentId }: MarkPaidButtonProps) {
     setLoading(true);
     setError(null);
     try {
-      await api.patch(`/installments/${installmentId}/pay`, {});
+      await api.patch(`/api/v1/installments/${installmentId}/pay`, {});
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao marcar como pago");

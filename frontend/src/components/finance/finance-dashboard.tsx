@@ -8,6 +8,7 @@ import { ProjectionCard } from "./projection-card";
 import { PartnerSplitCard } from "./partner-split-card";
 import { TransactionForm } from "./transaction-form";
 import { ExportButton } from "./export-button";
+import { api } from "@/lib/api";
 
 interface InitialData {
   summary: {
@@ -37,8 +38,6 @@ interface FinanceDashboardProps {
   initial: InitialData;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
-
 function getDefaultPeriod(): PeriodRange {
   const now = new Date();
   const year = now.getFullYear();
@@ -64,12 +63,12 @@ export function FinanceDashboard({ initial }: FinanceDashboardProps) {
     setPeriod(range);
 
     const [summaryRes, splitRes] = await Promise.all([
-      fetch(
-        `${BACKEND_URL}/api/v1/finance/summary?period=${range.type}&year=${range.year}&month=${range.month}`
-      ).then((r) => r.json()),
-      fetch(
-        `${BACKEND_URL}/api/v1/finance/split?from=${range.from}&to=${range.to}`
-      ).then((r) => r.json()),
+      api.get<InitialData["summary"]>(
+        `/api/v1/finance/summary?period=${range.type}&year=${range.year}&month=${range.month}`
+      ),
+      api.get<InitialData["split"]>(
+        `/api/v1/finance/split?from=${range.from}&to=${range.to}`
+      ),
     ]);
 
     setSummary(summaryRes);

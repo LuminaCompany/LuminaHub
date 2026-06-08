@@ -63,9 +63,9 @@ export function ClientForm({ client, trigger }: ClientFormProps) {
     setServerError(null);
     try {
       if (isEditing && client) {
-        await api.patch(`/clients/${client.id}`, data);
+        await api.patch(`/api/v1/clients/${client.id}`, data);
       } else {
-        await api.post("/clients", data);
+        await api.post("/api/v1/clients", data);
       }
       setOpen(false);
       reset();
