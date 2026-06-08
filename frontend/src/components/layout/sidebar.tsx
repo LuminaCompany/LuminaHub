@@ -112,9 +112,12 @@ function buildNavItems(
     },
   ];
 
-  // Hide any tab the user cannot at least view.
-  return items.filter(
-    (item) => !item.resource || can(profile, item.resource, "view")
+  // Keep every tab visible, but dim + disable the ones the user cannot view
+  // (instead of removing them). Already-disabled items (e.g. "Em breve") stay so.
+  return items.map((item) =>
+    item.resource && !can(profile, item.resource, "view")
+      ? { ...item, disabled: true }
+      : item
   );
 }
 
@@ -444,7 +447,9 @@ function SidebarContent({
       {/* Navigation */}
       <nav className={`flex-1 py-4 flex flex-col gap-0.5 overflow-y-auto ${collapsed ? "px-2" : "px-3"}`}>
         {navItems.map((item) => {
-          if (item.children) {
+          // A disabled parent (no view permission) renders as a dimmed, inert
+          // link — no dropdown, no navigation.
+          if (item.children && !item.disabled) {
             return (
               <NavDropdown
                 key={item.label}
@@ -459,7 +464,7 @@ function SidebarContent({
           return (
             <NavLink
               key={item.label}
-              href={item.href!}
+              href={item.href ?? "#"}
               label={item.label}
               icon={item.icon}
               badge={item.badge}
