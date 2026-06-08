@@ -1,5 +1,5 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { serverApi } from "@/lib/api.server";
+import { serverFetch } from "@/lib/api.server";
+import { CACHE_TAGS } from "@/lib/cache";
 import { MetricsOverviewCards } from "@/components/metrics/overview-cards";
 import { GoalsGrid } from "@/components/metrics/goals-grid";
 import { GoalForm } from "@/components/metrics/goal-form";
@@ -17,19 +17,17 @@ const FROM = `${YEAR}-01-01`;
 const TO = `${YEAR}-12-31`;
 
 async function fetchOverview(): Promise<MetricsOverview> {
-  return cachedFetch(
-    () => serverApi.get<MetricsOverview>(`/api/v1/metrics/overview?from=${FROM}&to=${TO}`),
-    ["metrics-overview", String(YEAR)],
-    { tags: [CACHE_TAGS.goals, CACHE_TAGS.tasks], revalidate: 60 }
-  );
+  return serverFetch<MetricsOverview>(`/api/v1/metrics/overview?from=${FROM}&to=${TO}`, {
+    tags: [CACHE_TAGS.goals, CACHE_TAGS.tasks],
+    revalidate: 60,
+  });
 }
 
 async function fetchGoalsByStatus(status: string): Promise<Goal[]> {
-  return cachedFetch(
-    () => serverApi.get<Goal[]>(`/api/v1/goals?status=${status}`),
-    ["goals", status],
-    { tags: [CACHE_TAGS.goals], revalidate: 60 }
-  );
+  return serverFetch<Goal[]>(`/api/v1/goals?status=${status}`, {
+    tags: [CACHE_TAGS.goals],
+    revalidate: 60,
+  });
 }
 
 export default async function MetricsPage() {
@@ -41,7 +39,6 @@ export default async function MetricsPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-      {/* Page header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
           <h1
@@ -62,10 +59,8 @@ export default async function MetricsPage() {
         <GoalForm />
       </div>
 
-      {/* KPI overview */}
       <MetricsOverviewCards data={overview} />
 
-      {/* Active goals */}
       <section style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <h2
@@ -96,7 +91,6 @@ export default async function MetricsPage() {
         <GoalsGrid goals={activeGoals} />
       </section>
 
-      {/* Completed goals */}
       <section style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <h2

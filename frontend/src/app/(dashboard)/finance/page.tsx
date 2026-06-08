@@ -1,5 +1,5 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { serverApi } from "@/lib/api.server";
+import { serverFetch } from "@/lib/api.server";
+import { CACHE_TAGS } from "@/lib/cache";
 import { FinanceDashboard } from "@/components/finance/finance-dashboard";
 import type { ChartDataPoint } from "@/components/finance/finance-chart";
 
@@ -31,39 +31,29 @@ const YEAR = now.getFullYear();
 const MONTH = now.getMonth() + 1;
 
 async function fetchSummary(): Promise<SummaryResponse> {
-  return cachedFetch(
-    () =>
-      serverApi.get<SummaryResponse>(
-        `/api/v1/finance/summary?period=month&year=${YEAR}&month=${MONTH}`
-      ),
-    ["finance-summary", String(YEAR), String(MONTH)],
+  return serverFetch<SummaryResponse>(
+    `/api/v1/finance/summary?period=month&year=${YEAR}&month=${MONTH}`,
     { tags: [CACHE_TAGS.transactions], revalidate: 60 }
   );
 }
 
 async function fetchChart(): Promise<ChartDataPoint[]> {
-  return cachedFetch(
-    () => serverApi.get<ChartDataPoint[]>(`/api/v1/finance/chart?type=monthly&year=${YEAR}`),
-    ["finance-chart", String(YEAR)],
+  return serverFetch<ChartDataPoint[]>(
+    `/api/v1/finance/chart?type=monthly&year=${YEAR}`,
     { tags: [CACHE_TAGS.transactions], revalidate: 60 }
   );
 }
 
 async function fetchProjection(): Promise<ProjectionResponse> {
-  return cachedFetch(
-    () => serverApi.get<ProjectionResponse>(`/api/v1/finance/projection?year=${YEAR}`),
-    ["finance-projection", String(YEAR)],
+  return serverFetch<ProjectionResponse>(
+    `/api/v1/finance/projection?year=${YEAR}`,
     { tags: [CACHE_TAGS.transactions], revalidate: 60 }
   );
 }
 
 async function fetchSplit(): Promise<SplitResponse> {
-  return cachedFetch(
-    () =>
-      serverApi.get<SplitResponse>(
-        `/api/v1/finance/split?from=${YEAR}-01-01&to=${YEAR}-12-31`
-      ),
-    ["finance-split", String(YEAR)],
+  return serverFetch<SplitResponse>(
+    `/api/v1/finance/split?from=${YEAR}-01-01&to=${YEAR}-12-31`,
     { tags: [CACHE_TAGS.transactions], revalidate: 60 }
   );
 }
@@ -78,7 +68,6 @@ export default async function FinancePage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-      {/* Page header */}
       <div>
         <h1
           style={{

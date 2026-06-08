@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { serverApi } from "@/lib/api.server";
+import { serverFetch } from "@/lib/api.server";
+import { CACHE_TAGS } from "@/lib/cache";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ServiceForm } from "@/components/clients/service-form";
 import { PaymentForm } from "@/components/clients/payment-form";
@@ -29,11 +29,10 @@ interface ServicePaymentWithInstallments extends ServicePayment {
 
 async function fetchClientDetail(id: string): Promise<ClientDetail | null> {
   try {
-    return await cachedFetch(
-      () => serverApi.get<ClientDetail>(`/clients/${id}`),
-      [`client-detail-${id}`],
-      { tags: [CACHE_TAGS.clients, CACHE_TAGS.services], revalidate: 60 }
-    );
+    return await serverFetch<ClientDetail>(`/clients/${id}`, {
+      tags: [CACHE_TAGS.clients, CACHE_TAGS.services],
+      revalidate: 60,
+    });
   } catch {
     return null;
   }
@@ -101,7 +100,6 @@ function ServiceCard({ service }: { service: ServiceWithPayments }) {
         border: "1px solid var(--border-subtle)",
       }}
     >
-      {/* Service header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
@@ -155,7 +153,6 @@ function ServiceCard({ service }: { service: ServiceWithPayments }) {
         </div>
       </div>
 
-      {/* Payment info */}
       {payment && (
         <div className="flex flex-col gap-3">
           <div
@@ -210,7 +207,6 @@ export default async function ClientDetailPage({ params }: PageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Back + Header */}
       <div className="flex flex-col gap-3">
         <Link
           href="/clients"
@@ -248,7 +244,6 @@ export default async function ClientDetailPage({ params }: PageProps) {
         )}
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="services">
         <TabsList variant="line">
           <TabsTrigger value="services">
@@ -260,7 +255,6 @@ export default async function ClientDetailPage({ params }: PageProps) {
           <TabsTrigger value="financial">Financeiro</TabsTrigger>
         </TabsList>
 
-        {/* Serviços */}
         <TabsContent value="services" className="mt-4">
           <div className="flex flex-col gap-4">
             <div className="flex justify-end">
@@ -295,7 +289,6 @@ export default async function ClientDetailPage({ params }: PageProps) {
           </div>
         </TabsContent>
 
-        {/* Contratos */}
         <TabsContent value="contracts" className="mt-4">
           <div className="flex flex-col gap-4">
             <div className="flex justify-end">
@@ -370,7 +363,6 @@ export default async function ClientDetailPage({ params }: PageProps) {
           </div>
         </TabsContent>
 
-        {/* Financeiro */}
         <TabsContent value="financial" className="mt-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div

@@ -1,5 +1,5 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { serverApi } from "@/lib/api.server";
+import { serverFetch } from "@/lib/api.server";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { Column } from "@/types";
 import { InternalPageClient } from "@/components/kanban/internal-page-client";
 
@@ -11,19 +11,17 @@ interface UserSummary {
 }
 
 async function fetchInternalColumns(): Promise<Column[]> {
-  return cachedFetch(
-    () => serverApi.get<Column[]>("/api/v1/columns/internal"),
-    ["internal-columns"],
-    { tags: [CACHE_TAGS.internalTasks], revalidate: 60 }
-  );
+  return serverFetch<Column[]>("/api/v1/columns/internal", {
+    tags: [CACHE_TAGS.internalTasks],
+    revalidate: 60,
+  });
 }
 
 async function fetchUsers(): Promise<UserSummary[]> {
-  return cachedFetch(
-    () => serverApi.get<UserSummary[]>("/api/v1/auth/users"),
-    ["users-list"],
-    { tags: [CACHE_TAGS.internalTasks], revalidate: 300 }
-  );
+  return serverFetch<UserSummary[]>("/api/v1/auth/users", {
+    tags: [CACHE_TAGS.internalTasks],
+    revalidate: 300,
+  });
 }
 
 export default async function InternalTasksPage() {
@@ -33,7 +31,6 @@ export default async function InternalTasksPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <div>
         <h1
           className="text-2xl font-bold tracking-wide"
@@ -47,7 +44,6 @@ export default async function InternalTasksPage() {
         </p>
       </div>
 
-      {/* Board */}
       <InternalPageClient initialColumns={columns} users={users} />
     </div>
   );

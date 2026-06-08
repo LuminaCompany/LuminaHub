@@ -1,5 +1,5 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { serverApi } from "@/lib/api.server";
+import { serverFetch } from "@/lib/api.server";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { Column, Project } from "@/types";
 import { ProjectBoard } from "@/components/kanban/project-board";
 import { CreateProjectDialog } from "@/components/kanban/create-project-dialog";
@@ -17,27 +17,24 @@ interface ProjectWithColumns extends Project {
 }
 
 async function fetchProjects(): Promise<Project[]> {
-  return cachedFetch(
-    () => serverApi.get<Project[]>("/api/v1/projects"),
-    ["projects-list"],
-    { tags: [CACHE_TAGS.projects], revalidate: 60 }
-  );
+  return serverFetch<Project[]>("/api/v1/projects", {
+    tags: [CACHE_TAGS.projects],
+    revalidate: 60,
+  });
 }
 
 async function fetchProjectColumns(projectId: string): Promise<Column[]> {
-  return cachedFetch(
-    () => serverApi.get<Column[]>(`/api/v1/projects/${projectId}/columns`),
-    ["project-columns", projectId],
-    { tags: [CACHE_TAGS.projects], revalidate: 60 }
-  );
+  return serverFetch<Column[]>(`/api/v1/projects/${projectId}/columns`, {
+    tags: [CACHE_TAGS.projects],
+    revalidate: 60,
+  });
 }
 
 async function fetchUsers(): Promise<UserSummary[]> {
-  return cachedFetch(
-    () => serverApi.get<UserSummary[]>("/api/v1/auth/users"),
-    ["users-list"],
-    { tags: [CACHE_TAGS.projects], revalidate: 300 }
-  );
+  return serverFetch<UserSummary[]>("/api/v1/auth/users", {
+    tags: [CACHE_TAGS.projects],
+    revalidate: 300,
+  });
 }
 
 export default async function ProjectsPage() {
@@ -54,7 +51,6 @@ export default async function ProjectsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Page header */}
       <div className="flex items-start justify-between">
         <div>
           <h1
@@ -85,7 +81,6 @@ export default async function ProjectsPage() {
         />
       </div>
 
-      {/* Project boards */}
       {projectsWithColumns.length === 0 ? (
         <div
           className="rounded-xl p-12 flex flex-col items-center justify-center gap-3"

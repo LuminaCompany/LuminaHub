@@ -1,9 +1,7 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { serverApi } from "@/lib/api.server";
+import { serverFetch } from "@/lib/api.server";
+import { CACHE_TAGS } from "@/lib/cache";
 import { HomeWidgets } from "@/components/home/home-widgets";
 import type { Goal, Task } from "@/types";
-
-// ─── Finance summary shape returned by /api/v1/finance/summary ───────────────
 
 export interface FinanceSummary {
   period: string;
@@ -16,21 +14,16 @@ export interface FinanceSummary {
   month_expenses: number;
 }
 
-// ─── Date constants (evaluated at render time on the server) ──────────────────
-
 const now = new Date();
 const YEAR = now.getFullYear();
 const MONTH = now.getMonth() + 1;
 
-// ─── Data fetchers ────────────────────────────────────────────────────────────
-
 async function fetchActiveGoals(): Promise<Goal[]> {
   try {
-    return await cachedFetch(
-      () => serverApi.get<Goal[]>("/api/v1/goals?status=active&limit=3"),
-      ["home-goals-active"],
-      { tags: [CACHE_TAGS.home, CACHE_TAGS.goals], revalidate: 60 }
-    );
+    return await serverFetch<Goal[]>("/api/v1/goals?status=active&limit=3", {
+      tags: [CACHE_TAGS.home, CACHE_TAGS.goals],
+      revalidate: 60,
+    });
   } catch {
     return [];
   }
@@ -38,11 +31,10 @@ async function fetchActiveGoals(): Promise<Goal[]> {
 
 async function fetchPriorityTasks(): Promise<Task[]> {
   try {
-    return await cachedFetch(
-      () => serverApi.get<Task[]>("/api/v1/tasks?priority=high,urgent&limit=5"),
-      ["home-tasks-priority"],
-      { tags: [CACHE_TAGS.home, CACHE_TAGS.tasks], revalidate: 60 }
-    );
+    return await serverFetch<Task[]>("/api/v1/tasks?priority=high,urgent&limit=5", {
+      tags: [CACHE_TAGS.home, CACHE_TAGS.tasks],
+      revalidate: 60,
+    });
   } catch {
     return [];
   }
@@ -50,20 +42,14 @@ async function fetchPriorityTasks(): Promise<Task[]> {
 
 async function fetchFinanceSummary(): Promise<FinanceSummary | null> {
   try {
-    return await cachedFetch(
-      () =>
-        serverApi.get<FinanceSummary>(
-          `/api/v1/finance/summary?period=month&year=${YEAR}&month=${MONTH}`
-        ),
-      ["home-finance-summary", String(YEAR), String(MONTH)],
+    return await serverFetch<FinanceSummary>(
+      `/api/v1/finance/summary?period=month&year=${YEAR}&month=${MONTH}`,
       { tags: [CACHE_TAGS.home, CACHE_TAGS.transactions], revalidate: 60 }
     );
   } catch {
     return null;
   }
 }
-
-// ─── Formatted date for hero ──────────────────────────────────────────────────
 
 function formatHeroDate(): string {
   return now.toLocaleDateString("pt-BR", {
@@ -73,8 +59,6 @@ function formatHeroDate(): string {
     day: "numeric",
   });
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
   const [goals, tasks, financeSummary] = await Promise.all([
@@ -87,7 +71,6 @@ export default async function HomePage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <div
         style={{
           position: "relative",
@@ -98,7 +81,6 @@ export default async function HomePage() {
           overflow: "hidden",
         }}
       >
-        {/* Ambient glow */}
         <div
           aria-hidden="true"
           style={{
@@ -110,9 +92,7 @@ export default async function HomePage() {
           }}
         />
 
-        {/* Content */}
         <div style={{ position: "relative" }}>
-          {/* Mono date label */}
           <p
             style={{
               fontFamily: "var(--font-mono)",
@@ -126,7 +106,6 @@ export default async function HomePage() {
             {heroDate}
           </p>
 
-          {/* Display title */}
           <h1
             style={{
               fontFamily: "var(--font-display)",
@@ -141,7 +120,6 @@ export default async function HomePage() {
             LuminaHub
           </h1>
 
-          {/* Subtitle */}
           <p
             style={{
               fontFamily: "var(--font-mono)",
@@ -157,7 +135,6 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* ── Widgets grid ──────────────────────────────────────────────────── */}
       <HomeWidgets
         goals={goals}
         tasks={tasks}

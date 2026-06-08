@@ -15,15 +15,18 @@ async function getServerAuthHeaders(): Promise<Record<string, string>> {
   return {};
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function serverFetch<T>(
+  path: string,
+  options?: { tags?: string[]; revalidate?: number | false }
+): Promise<T> {
   const authHeaders = await getServerAuthHeaders();
 
   const response = await fetch(`${BACKEND_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders,
-      ...(init?.headers as Record<string, string>),
+    method: "GET",
+    headers: { "Content-Type": "application/json", ...authHeaders },
+    next: {
+      revalidate: options?.revalidate ?? 60,
+      tags: options?.tags,
     },
   });
 
@@ -34,9 +37,3 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
-
-export const serverApi = {
-  get<T>(path: string) {
-    return request<T>(path, { method: "GET" });
-  },
-};

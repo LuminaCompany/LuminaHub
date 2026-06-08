@@ -1,26 +1,24 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/sidebar";
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { serverApi } from "@/lib/api.server";
+import { serverFetch } from "@/lib/api.server";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { Column } from "@/types";
 
 async function fetchProjectTaskCount(): Promise<number> {
   try {
-    const projects = await cachedFetch(
-      () => serverApi.get<{ id: string }[]>("/api/v1/projects"),
-      ["layout-projects"],
-      { tags: [CACHE_TAGS.projects], revalidate: 120 }
-    );
+    const projects = await serverFetch<{ id: string }[]>("/api/v1/projects", {
+      tags: [CACHE_TAGS.projects],
+      revalidate: 120,
+    });
     if (!projects.length) return 0;
 
     const allColumns = await Promise.all(
       projects.map((p) =>
-        cachedFetch(
-          () => serverApi.get<Column[]>(`/api/v1/projects/${p.id}/columns`),
-          ["layout-project-columns", p.id],
-          { tags: [CACHE_TAGS.projects], revalidate: 120 }
-        )
+        serverFetch<Column[]>(`/api/v1/projects/${p.id}/columns`, {
+          tags: [CACHE_TAGS.projects],
+          revalidate: 120,
+        })
       )
     );
     return allColumns.flat().reduce((acc, col) => acc + (col.tasks?.length ?? 0), 0);
@@ -31,11 +29,10 @@ async function fetchProjectTaskCount(): Promise<number> {
 
 async function fetchInternalTaskCount(): Promise<number> {
   try {
-    const columns = await cachedFetch(
-      () => serverApi.get<Column[]>("/api/v1/columns/internal"),
-      ["layout-internal-columns"],
-      { tags: [CACHE_TAGS.internalTasks], revalidate: 120 }
-    );
+    const columns = await serverFetch<Column[]>("/api/v1/columns/internal", {
+      tags: [CACHE_TAGS.internalTasks],
+      revalidate: 120,
+    });
     return columns.reduce((acc, col) => acc + (col.tasks?.length ?? 0), 0);
   } catch {
     return 0;

@@ -1,5 +1,5 @@
-import { cachedFetch, CACHE_TAGS } from "@/lib/cache.server";
-import { serverApi } from "@/lib/api.server";
+import { serverFetch } from "@/lib/api.server";
+import { CACHE_TAGS } from "@/lib/cache";
 import { ClientsTable } from "@/components/clients/clients-table";
 import { ClientForm } from "@/components/clients/client-form";
 import type { Client } from "@/types";
@@ -9,11 +9,10 @@ interface ClientWithServiceCount extends Client {
 }
 
 async function fetchClients(): Promise<ClientWithServiceCount[]> {
-  return cachedFetch(
-    () => serverApi.get<ClientWithServiceCount[]>("/clients"),
-    ["clients-list"],
-    { tags: [CACHE_TAGS.clients], revalidate: 60 }
-  );
+  return serverFetch<ClientWithServiceCount[]>("/clients", {
+    tags: [CACHE_TAGS.clients],
+    revalidate: 60,
+  });
 }
 
 export default async function ClientsPage() {
@@ -21,7 +20,6 @@ export default async function ClientsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1
@@ -39,7 +37,6 @@ export default async function ClientsPage() {
         <ClientForm />
       </div>
 
-      {/* Table */}
       <ClientsTable clients={clients} />
     </div>
   );
