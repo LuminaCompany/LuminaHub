@@ -20,14 +20,14 @@ const TO = `${YEAR}-12-31`;
 async function fetchOverview(): Promise<MetricsOverview> {
   return serverFetch<MetricsOverview>(`/api/v1/metrics/overview?from=${FROM}&to=${TO}`, {
     tags: [CACHE_TAGS.goals, CACHE_TAGS.tasks, CACHE_TAGS.services],
-    revalidate: 5,
+    revalidate: 2,
   });
 }
 
 async function fetchGoalsByStatus(status: string): Promise<Goal[]> {
   return serverFetch<Goal[]>(`/api/v1/goals?status=${status}`, {
     tags: [CACHE_TAGS.goals],
-    revalidate: 5,
+    revalidate: 2,
   });
 }
 

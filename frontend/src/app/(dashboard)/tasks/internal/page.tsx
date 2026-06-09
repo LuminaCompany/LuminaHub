@@ -13,14 +13,14 @@ interface UserSummary {
 async function fetchInternalColumns(): Promise<Column[]> {
   return serverFetch<Column[]>("/api/v1/columns/internal", {
     tags: [CACHE_TAGS.internalTasks],
-    revalidate: 5,
+    revalidate: 2,
   });
 }
 
 async function fetchUsers(): Promise<UserSummary[]> {
   return serverFetch<UserSummary[]>("/api/v1/auth/users", {
     tags: [CACHE_TAGS.users],
-    revalidate: 5,
+    revalidate: 2,
   });
 }
 

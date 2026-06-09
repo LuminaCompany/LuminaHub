@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Pencil, Check, X, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { ColorPicker } from "./color-picker";
 
 interface FilterState {
   assigneeId: string;
@@ -12,19 +13,23 @@ interface FilterState {
 
 interface ProjectHeaderProps {
   name: string;
+  color: string | null;
   users: { id: string; name: string }[];
   filters: FilterState;
   onFiltersChange: (f: FilterState) => void;
   onRename: (name: string) => void;
+  onColorChange: (color: string | null) => void;
   onDelete: () => void;
 }
 
 export function ProjectHeader({
   name,
+  color,
   users,
   filters,
   onFiltersChange,
   onRename,
+  onColorChange,
   onDelete,
 }: ProjectHeaderProps) {
   const [editing, setEditing] = useState(false);
@@ -62,6 +67,14 @@ export function ProjectHeader({
     <div className="flex flex-col gap-3 mb-4">
       {/* Title row */}
       <div className="flex items-center gap-3">
+        {/* Accent color */}
+        {color && (
+          <span
+            className="rounded-full shrink-0"
+            style={{ width: 12, height: 12, backgroundColor: color }}
+          />
+        )}
+
         {editing ? (
           <div className="flex items-center gap-2">
             <Input
@@ -91,14 +104,17 @@ export function ProjectHeader({
         )}
 
         {!editing && (
-          <button
-            onClick={onDelete}
-            className="p-1 rounded opacity-40 hover:opacity-100 transition-opacity"
-            style={{ color: "var(--negative)" }}
-            title="Excluir projeto"
-          >
-            <Trash2 size={15} />
-          </button>
+          <>
+            <ColorPicker value={color} onChange={onColorChange} size={16} />
+            <button
+              onClick={onDelete}
+              className="p-1 rounded opacity-40 hover:opacity-100 transition-opacity"
+              style={{ color: "var(--negative)" }}
+              title="Excluir projeto"
+            >
+              <Trash2 size={15} />
+            </button>
+          </>
         )}
       </div>
 

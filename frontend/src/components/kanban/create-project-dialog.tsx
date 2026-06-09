@@ -15,6 +15,7 @@ import { revalidateCache } from "@/actions/cache";
 import { CACHE_TAGS } from "@/lib/cache";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { ColorPicker } from "./color-picker";
 
 interface CreateProjectDialogProps {
   trigger: React.ReactNode;
@@ -26,6 +27,7 @@ export function CreateProjectDialog({ trigger, onCreated }: CreateProjectDialogP
   const [, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [color, setColor] = useState<string | null>("#3b82f6");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -35,9 +37,10 @@ export function CreateProjectDialog({ trigger, onCreated }: CreateProjectDialogP
     setLoading(true);
     setError("");
     try {
-      await api.post("/api/v1/projects", { name: trimmed });
+      await api.post("/api/v1/projects", { name: trimmed, color });
       await revalidateCache([CACHE_TAGS.projects]);
       setName("");
+      setColor("#3b82f6");
       setOpen(false);
       if (onCreated) onCreated();
       startTransition(() => router.refresh());
@@ -89,6 +92,15 @@ export function CreateProjectDialog({ trigger, onCreated }: CreateProjectDialogP
               {error && (
                 <p className="text-xs mt-1" style={{ color: "var(--negative)" }}>{error}</p>
               )}
+            </div>
+
+            <div>
+              <label
+                style={{ color: "var(--fg-2)", fontSize: "0.75rem", display: "block", marginBottom: 6 }}
+              >
+                Cor do projeto
+              </label>
+              <ColorPicker value={color} onChange={setColor} size={24} />
             </div>
           </div>
 

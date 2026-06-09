@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import { useState, useTransition, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Column, Task } from "@/types";
 import { api } from "@/lib/api";
@@ -22,6 +22,7 @@ interface FilterState {
 interface ProjectBoardProps {
   projectId: string;
   projectName: string;
+  projectColor: string | null;
   initialColumns: Column[];
   users: { id: string; name: string; avatar_url: string | null }[];
 }
@@ -39,7 +40,7 @@ function applyFilters(columns: Column[], filters: FilterState): Column[] {
   }));
 }
 
-export function ProjectBoard({ projectId, projectName, initialColumns, users }: ProjectBoardProps) {
+export function ProjectBoard({ projectId, projectName, projectColor, initialColumns, users }: ProjectBoardProps) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [columns, setColumns] = useState<Column[]>(initialColumns);
@@ -47,6 +48,12 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
   const [taskFormOpen, setTaskFormOpen] = useState(false);
   const [activeColumnId, setActiveColumnId] = useState<string | undefined>();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // A soft refresh (AutoRefresh poll) re-runs the server page and passes fresh
+  // columns — sync them in so other users' changes appear without an F5.
+  useEffect(() => {
+    setColumns(initialColumns);
+  }, [initialColumns]);
 
   const refresh = useCallback(() => {
     startTransition(async () => {
@@ -89,6 +96,11 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
     refresh();
   }
 
+  async function handleColorProject(color: string | null) {
+    await api.patch(`/api/v1/projects/${projectId}`, { color });
+    refresh();
+  }
+
   async function handleDeleteProject() {
     if (!confirm(`Excluir o projeto "${projectName}" e todas as suas colunas e tarefas?`)) return;
     await api.delete(`/api/v1/projects/${projectId}`);
@@ -98,6 +110,12 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
   async function handleRenameColumn(columnId: string, name: string) {
     await api.patch(`/api/v1/columns/${columnId}`, { name });
     refresh();
+  }
+
+  async function handleColorColumn(columnId: string, color: string | null) {
+    setColumns((prev) => prev.map((c) => (c.id === columnId ? { ...c, color } : c)));
+    await api.patch(`/api/v1/columns/${columnId}`, { color });
+    await revalidateCache(BOARD_TAGS);
   }
 
   async function handleDeleteColumn(columnId: string) {
@@ -124,10 +142,12 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
     <div>
       <ProjectHeader
         name={projectName}
+        color={projectColor}
         users={users}
         filters={filters}
         onFiltersChange={setFilters}
         onRename={handleRenameProject}
+        onColorChange={handleColorProject}
         onDelete={handleDeleteProject}
       />
 
@@ -140,6 +160,7 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
           onTaskCreate={handleTaskCreate}
           onTaskEdit={handleTaskEdit}
           onColumnRename={handleRenameColumn}
+          onColumnColor={handleColorColumn}
           onColumnDelete={handleDeleteColumn}
         />
         <AddColumnInline

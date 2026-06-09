@@ -23,7 +23,7 @@ async function fetchActiveGoals(): Promise<Goal[]> {
   try {
     return await serverFetch<Goal[]>("/api/v1/goals?status=active&limit=3", {
       tags: [CACHE_TAGS.home, CACHE_TAGS.goals],
-      revalidate: 5,
+      revalidate: 2,
     });
   } catch {
     return [];
@@ -34,7 +34,7 @@ async function fetchPriorityTasks(): Promise<Task[]> {
   try {
     const res = await serverFetch<{ data: Task[] }>("/api/v1/tasks?priority=high,urgent&limit=5", {
       tags: [CACHE_TAGS.home, CACHE_TAGS.tasks],
-      revalidate: 5,
+      revalidate: 2,
     });
     return res.data ?? [];
   } catch {
@@ -46,7 +46,7 @@ async function fetchFinanceSummary(): Promise<FinanceSummary | null> {
   try {
     return await serverFetch<FinanceSummary>(
       `/api/v1/finance/summary?period=month&year=${YEAR}&month=${MONTH}`,
-      { tags: [CACHE_TAGS.home, CACHE_TAGS.transactions], revalidate: 5 }
+      { tags: [CACHE_TAGS.home, CACHE_TAGS.transactions], revalidate: 2 }
     );
   } catch {
     return null;

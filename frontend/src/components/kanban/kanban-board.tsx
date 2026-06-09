@@ -17,6 +17,7 @@ interface KanbanBoardProps {
   onTaskCreate: (columnId: string) => void;
   onTaskEdit: (task: Task) => void;
   onColumnRename: (columnId: string, name: string) => void;
+  onColumnColor: (columnId: string, color: string | null) => void;
   onColumnDelete: (columnId: string) => void;
 }
 
@@ -28,6 +29,7 @@ export function KanbanBoard({
   onTaskCreate,
   onTaskEdit,
   onColumnRename,
+  onColumnColor,
   onColumnDelete,
 }: KanbanBoardProps) {
   function handleDragEnd(result: DropResult) {
@@ -69,6 +71,7 @@ export function KanbanBoard({
                 onTaskCreate={() => onTaskCreate(col.id)}
                 onTaskEdit={onTaskEdit}
                 onRename={(name) => onColumnRename(col.id, name)}
+                onColorChange={(color) => onColumnColor(col.id, color)}
                 onDelete={() => onColumnDelete(col.id)}
               />
             ))}

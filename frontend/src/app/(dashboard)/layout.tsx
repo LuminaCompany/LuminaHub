@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/layout/sidebar";
 import { PermissionsProvider } from "@/components/permissions-provider";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { serverFetch, getProfile } from "@/lib/api.server";
 import { CACHE_TAGS } from "@/lib/cache";
 import type { Column } from "@/types";
@@ -19,7 +20,7 @@ async function fetchProjectTaskCount(userId: string): Promise<number> {
   try {
     const projects = await serverFetch<{ id: string }[]>("/api/v1/projects", {
       tags: [CACHE_TAGS.projects],
-      revalidate: 5,
+      revalidate: 2,
     });
     if (!projects.length) return 0;
 
@@ -27,7 +28,7 @@ async function fetchProjectTaskCount(userId: string): Promise<number> {
       projects.map((p) =>
         serverFetch<Column[]>(`/api/v1/projects/${p.id}/columns`, {
           tags: [CACHE_TAGS.projects],
-          revalidate: 5,
+          revalidate: 2,
         })
       )
     );
@@ -41,7 +42,7 @@ async function fetchInternalTaskCount(userId: string): Promise<number> {
   try {
     const columns = await serverFetch<Column[]>("/api/v1/columns/internal", {
       tags: [CACHE_TAGS.internalTasks],
-      revalidate: 5,
+      revalidate: 2,
     });
     return countOwnTasks(columns, userId);
   } catch {
@@ -71,6 +72,7 @@ export default async function DashboardLayout({
 
   return (
     <PermissionsProvider profile={profile}>
+      <AutoRefresh intervalMs={2000} />
       <div
         className="flex min-h-screen"
         style={{ backgroundColor: "var(--bg)" }}

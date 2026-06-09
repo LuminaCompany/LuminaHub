@@ -20,21 +20,21 @@ interface ProjectWithColumns extends Project {
 async function fetchProjects(): Promise<Project[]> {
   return serverFetch<Project[]>("/api/v1/projects", {
     tags: [CACHE_TAGS.projects],
-    revalidate: 5,
+    revalidate: 2,
   });
 }
 
 async function fetchProjectColumns(projectId: string): Promise<Column[]> {
   return serverFetch<Column[]>(`/api/v1/projects/${projectId}/columns`, {
     tags: [CACHE_TAGS.projects],
-    revalidate: 5,
+    revalidate: 2,
   });
 }
 
 async function fetchUsers(): Promise<UserSummary[]> {
   return serverFetch<UserSummary[]>("/api/v1/auth/users", {
     tags: [CACHE_TAGS.users],
-    revalidate: 5,
+    revalidate: 2,
   });
 }
 
@@ -105,6 +105,7 @@ export default async function ProjectsPage() {
               <ProjectBoard
                 projectId={project.id}
                 projectName={project.name}
+                projectColor={project.color}
                 initialColumns={project.columns ?? []}
                 users={users}
               />

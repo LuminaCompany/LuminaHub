@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import { useState, useTransition, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Column, Task } from "@/types";
 import { api } from "@/lib/api";
@@ -45,6 +45,12 @@ export function InternalBoard({ initialColumns, users, filters }: InternalBoardP
   const [activeColumnId, setActiveColumnId] = useState<string | undefined>();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
+  // A soft refresh (AutoRefresh poll) re-runs the server page and passes fresh
+  // columns — sync them in so other users' changes appear without an F5.
+  useEffect(() => {
+    setColumns(initialColumns);
+  }, [initialColumns]);
+
   const refresh = useCallback(() => {
     startTransition(async () => {
       await revalidateCache(BOARD_TAGS);
@@ -86,6 +92,12 @@ export function InternalBoard({ initialColumns, users, filters }: InternalBoardP
     refresh();
   }
 
+  async function handleColorColumn(columnId: string, color: string | null) {
+    setColumns((prev) => prev.map((c) => (c.id === columnId ? { ...c, color } : c)));
+    await api.patch(`/api/v1/columns/${columnId}`, { color });
+    await revalidateCache(BOARD_TAGS);
+  }
+
   async function handleDeleteColumn(columnId: string) {
     if (!confirm("Excluir esta coluna e todas as tarefas?")) return;
     await api.delete(`/api/v1/columns/${columnId}`);
@@ -112,6 +124,7 @@ export function InternalBoard({ initialColumns, users, filters }: InternalBoardP
           setTaskFormOpen(true);
         }}
         onColumnRename={handleRenameColumn}
+        onColumnColor={handleColorColumn}
         onColumnDelete={handleDeleteColumn}
       />
       <AddColumnInline

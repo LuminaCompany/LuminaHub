@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { PeriodFilter, PeriodRange, PeriodType } from "./period-filter";
 import { SummaryCards } from "./summary-cards";
 import { FinanceChart, ChartDataPoint } from "./finance-chart";
@@ -55,13 +55,32 @@ function getDefaultPeriod(): PeriodRange {
 
 export function FinanceDashboard({ initial }: FinanceDashboardProps) {
   const [summary, setSummary] = useState(initial.summary);
-  const [chart] = useState(initial.chart);
-  const [projection] = useState(initial.projection);
+  const [chart, setChart] = useState(initial.chart);
+  const [projection, setProjection] = useState(initial.projection);
   const [split, setSplit] = useState(initial.split);
   const [period, setPeriod] = useState<PeriodRange>(getDefaultPeriod());
+  // Once the user picks a custom period, polling must not overwrite their
+  // summary/split selection.
+  const [customPeriod, setCustomPeriod] = useState(false);
+
+  // Year-level data (chart, projection) is period-independent — always sync from
+  // the server on soft refresh so the dashboard tracks other users' changes.
+  useEffect(() => {
+    setChart(initial.chart);
+    setProjection(initial.projection);
+  }, [initial.chart, initial.projection]);
+
+  // Default-period KPIs sync too, unless the user switched to a custom period.
+  useEffect(() => {
+    if (!customPeriod) {
+      setSummary(initial.summary);
+      setSplit(initial.split);
+    }
+  }, [initial.summary, initial.split, customPeriod]);
 
   const fetchPeriodData = useCallback(async (range: PeriodRange) => {
     setPeriod(range);
+    setCustomPeriod(true);
 
     const [summaryRes, splitRes] = await Promise.all([
       api.get<InitialData["summary"]>(

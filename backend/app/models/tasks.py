@@ -16,6 +16,8 @@ class TaskCreate(BaseModel):
     due_date: date | None = None
     tags: list[str] = []
     position: int = 0
+    color: str | None = Field(default=None, max_length=32)
+    cover: bool = False
 
 
 class TaskUpdate(BaseModel):
@@ -26,6 +28,8 @@ class TaskUpdate(BaseModel):
     due_date: date | None = None
     tags: list[str] | None = None
     position: int | None = None
+    color: str | None = Field(default=None, max_length=32)
+    cover: bool | None = None
 
 
 class TaskMove(BaseModel):
@@ -59,6 +63,8 @@ class TaskResponse(BaseModel):
     due_date: date | None
     tags: list[str]
     position: int
+    color: str | None = None
+    cover: bool = False
     created_at: datetime
     updated_at: datetime
 

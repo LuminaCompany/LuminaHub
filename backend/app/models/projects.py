@@ -11,12 +11,14 @@ class ProjectCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     status: Literal["active", "archived"] = "active"
     position: int = 0
+    color: str | None = Field(default=None, max_length=32)
 
 
 class ProjectUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=255)
     status: Literal["active", "archived"] | None = None
     position: int | None = None
+    color: str | None = Field(default=None, max_length=32)
 
 
 class ProjectResponse(BaseModel):
@@ -26,5 +28,6 @@ class ProjectResponse(BaseModel):
     name: str
     status: str
     position: int
+    color: str | None = None
     created_at: datetime
     updated_at: datetime

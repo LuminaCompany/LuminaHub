@@ -5,6 +5,7 @@ import { Plus, Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { usePermissions } from "@/components/permissions-provider";
+import { ColorPicker } from "./color-picker";
 
 interface AddColumnInlineProps {
   projectId?: string;
@@ -15,6 +16,7 @@ interface AddColumnInlineProps {
 export function AddColumnInline({ projectId, nextPosition, onCreated }: AddColumnInlineProps) {
   const [active, setActive] = useState(false);
   const [value, setValue] = useState("");
+  const [color, setColor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { can } = usePermissions();
 
@@ -30,9 +32,11 @@ export function AddColumnInline({ projectId, nextPosition, onCreated }: AddColum
         name,
         project_id: projectId ?? null,
         position: nextPosition,
+        color,
       });
       onCreated();
       setValue("");
+      setColor(null);
       setActive(false);
     } finally {
       setLoading(false);
@@ -84,6 +88,7 @@ export function AddColumnInline({ projectId, nextPosition, onCreated }: AddColum
         style={{ backgroundColor: "var(--surface-2)", borderColor: "var(--border-2)", color: "var(--fg-1)" }}
       />
       <div className="flex items-center gap-2">
+        <ColorPicker value={color} onChange={setColor} size={20} />
         <button
           onClick={handleCreate}
           disabled={loading || !value.trim()}

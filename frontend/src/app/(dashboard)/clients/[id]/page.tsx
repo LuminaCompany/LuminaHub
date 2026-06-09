@@ -31,7 +31,7 @@ async function fetchClientDetail(id: string): Promise<ClientDetail | null> {
   try {
     return await serverFetch<ClientDetail>(`/api/v1/clients/${id}`, {
       tags: [CACHE_TAGS.clients, CACHE_TAGS.services],
-      revalidate: 5,
+      revalidate: 2,
     });
   } catch {
     return null;

@@ -40,7 +40,7 @@ async def db_create_column(sb: AsyncClient, payload: ColumnCreate) -> dict:
 async def db_update_column(
     sb: AsyncClient, column_id: str, payload: ColumnUpdate
 ) -> dict | None:
-    data = payload.model_dump(exclude_none=True)
+    data = payload.model_dump(exclude_unset=True)
     if not data:
         return await db_get_column(sb, column_id)
     response = await sb.table(_TABLE).update(data).eq("id", column_id).execute()

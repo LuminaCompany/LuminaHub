@@ -65,6 +65,7 @@ export interface Project {
   name: string
   status: ProjectStatus
   position: number
+  color: string | null
   created_at: string
   updated_at: string
 }
@@ -75,6 +76,7 @@ export interface Column {
   project_id: string | null
   name: string
   position: number
+  color: string | null
   tasks?: Task[]
   created_at: string
   updated_at: string
@@ -94,6 +96,8 @@ export interface Task {
   due_date: string | null
   tags: string[]
   position: number
+  color: string | null
+  cover: boolean
   created_at: string
   updated_at: string
 }

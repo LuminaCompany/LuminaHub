@@ -5,6 +5,7 @@ import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { MoreHorizontal, Plus, Pencil, Trash2 } from "lucide-react";
 import type { Column, Task } from "@/types";
 import { TaskCard } from "./task-card";
+import { ColorPicker } from "./color-picker";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,6 +24,7 @@ interface KanbanColumnProps {
   onTaskCreate: () => void;
   onTaskEdit: (task: Task) => void;
   onRename: (name: string) => void;
+  onColorChange: (color: string | null) => void;
   onDelete: () => void;
 }
 
@@ -33,6 +35,7 @@ export function KanbanColumn({
   onTaskCreate,
   onTaskEdit,
   onRename,
+  onColorChange,
   onDelete,
 }: KanbanColumnProps) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -73,12 +76,21 @@ export function KanbanColumn({
               backgroundColor: "var(--surface-2)",
               border: "1px solid var(--border)",
               borderBottom: "none",
+              borderTop: column.color
+                ? `3px solid ${column.color}`
+                : "1px solid var(--border)",
             }}
             {...provided.dragHandleProps}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              {column.color && (
+                <span
+                  className="rounded-full shrink-0"
+                  style={{ width: 9, height: 9, backgroundColor: column.color }}
+                />
+              )}
               <span
-                className="text-sm font-medium"
+                className="text-sm font-medium truncate"
                 style={{ color: "var(--fg-1)" }}
               >
                 {column.name}
@@ -95,7 +107,10 @@ export function KanbanColumn({
               </span>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
+              {canEdit && (
+                <ColorPicker value={column.color} onChange={onColorChange} size={14} />
+              )}
               {canCreate && (
                 <button
                   onClick={onTaskCreate}

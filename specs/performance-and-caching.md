@@ -12,12 +12,13 @@ RLS é **bypassado no hot path** (backend usa service-role). Tabelas pequenas
 
 ## 1. Cache & responsividade (frontend)
 
-Modelo: **fetch tagueado + `revalidate` curto + purge da tag na mutação**.
-Resultado: a tua própria mudança aparece instantânea (read-your-own-writes); a
-mudança do outro usuário aparece em ≤ 5s.
+Modelo: **fetch tagueado + `revalidate` curto + purge da tag na mutação +
+auto-refresh por polling**. Resultado: a tua própria mudança aparece instantânea
+(read-your-own-writes); a mudança do outro usuário aparece em ≤ 2s (a página se
+atualiza sozinha).
 
 ### Regras
-1. **Todo `serverFetch` leva `tags` + `revalidate: 5`.** Nunca deixar fetch sem
+1. **Todo `serverFetch` leva `tags` + `revalidate: 2`.** Nunca deixar fetch sem
    tag. (Exceção: dados sempre-frescos como Settings → `revalidate: 0`.)
 2. **Toda mutação chama `revalidateCache([...tags])` ANTES de `router.refresh()`.**
    `router.refresh()` sozinho NÃO limpa o Data Cache — re-renderiza sobre cache
@@ -26,6 +27,16 @@ mudança do outro usuário aparece em ≤ 5s.
 4. Aba "lenta pra atualizar" = quase sempre mutação nova só com `router.refresh()`
    sem `revalidateCache`. **Corrige adicionando a tag certa, não baixando o
    `revalidate`.**
+
+### Auto-refresh (polling 2s)
+- `frontend/src/components/auto-refresh.tsx` faz `router.refresh()` a cada 2s
+  (soft refresh — preserva estado/scroll; pausa quando a aba está oculta).
+  Montado uma vez no layout do dashboard. Com `revalidate: 2`, cada poll busca
+  dado fresco.
+- **Gotcha:** componente que guarda dado de servidor em `useState(prop)` NÃO
+  reage ao soft refresh (só re-monta no F5). Se criar um, **sincronize via
+  `useEffect(() => setX(prop), [prop])`** (ver ProjectBoard, InternalBoard,
+  FinanceDashboard). Sem isso, a aba "só atualiza no F5".
 
 ### Onde fica
 - Tags: `frontend/src/lib/cache.ts` (`CACHE_TAGS`).
