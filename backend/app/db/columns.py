@@ -54,6 +54,11 @@ async def db_delete_column(sb: AsyncClient, column_id: str) -> None:
 async def db_reorder_columns(
     sb: AsyncClient, column_ids: list[str]
 ) -> None:
-    """Update position for each column_id based on its index in the list."""
-    for index, col_id in enumerate(column_ids):
-        await sb.table(_TABLE).update({"position": index}).eq("id", col_id).execute()
+    """Set every column's position from its index in one atomic round-trip.
+
+    Delegates to the `reorder_columns` RPC (single UPDATE keyed on
+    array_position) instead of issuing one UPDATE per column in a loop.
+    """
+    await sb.rpc(
+        "reorder_columns", {"p_ids": [str(cid) for cid in column_ids]}
+    ).execute()
