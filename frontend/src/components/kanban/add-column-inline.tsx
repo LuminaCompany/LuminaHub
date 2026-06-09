@@ -48,7 +48,7 @@ export function AddColumnInline({ projectId, nextPosition, onCreated }: AddColum
     return (
       <button
         onClick={() => setActive(true)}
-        className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all shrink-0"
+        className="flex items-center gap-2 px-4 py-3 rounded-xl transition-all shrink-0 self-start"
         style={{
           minWidth: 200,
           backgroundColor: "rgba(255,255,255,0.02)",
@@ -72,7 +72,7 @@ export function AddColumnInline({ projectId, nextPosition, onCreated }: AddColum
 
   return (
     <div
-      className="flex flex-col gap-2 p-3 rounded-xl shrink-0"
+      className="flex flex-col gap-2 p-3 rounded-xl shrink-0 self-start"
       style={{ minWidth: 240, backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
     >
       <Input

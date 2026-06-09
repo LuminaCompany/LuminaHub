@@ -6,7 +6,16 @@ import { serverFetch, getProfile } from "@/lib/api.server";
 import { CACHE_TAGS } from "@/lib/cache";
 import type { Column } from "@/types";
 
-async function fetchProjectTaskCount(): Promise<number> {
+/** Count only tasks assigned to the current user across the given columns. */
+function countOwnTasks(columns: Column[], userId: string): number {
+  return columns.reduce(
+    (acc, col) =>
+      acc + (col.tasks?.filter((t) => t.assignee_id === userId).length ?? 0),
+    0
+  );
+}
+
+async function fetchProjectTaskCount(userId: string): Promise<number> {
   try {
     const projects = await serverFetch<{ id: string }[]>("/api/v1/projects", {
       tags: [CACHE_TAGS.projects],
@@ -22,19 +31,19 @@ async function fetchProjectTaskCount(): Promise<number> {
         })
       )
     );
-    return allColumns.flat().reduce((acc, col) => acc + (col.tasks?.length ?? 0), 0);
+    return countOwnTasks(allColumns.flat(), userId);
   } catch {
     return 0;
   }
 }
 
-async function fetchInternalTaskCount(): Promise<number> {
+async function fetchInternalTaskCount(userId: string): Promise<number> {
   try {
     const columns = await serverFetch<Column[]>("/api/v1/columns/internal", {
       tags: [CACHE_TAGS.internalTasks],
       revalidate: 120,
     });
-    return columns.reduce((acc, col) => acc + (col.tasks?.length ?? 0), 0);
+    return countOwnTasks(columns, userId);
   } catch {
     return 0;
   }
@@ -56,8 +65,8 @@ export default async function DashboardLayout({
 
   const [profile, projectCount, internalTaskCount] = await Promise.all([
     getProfile(),
-    fetchProjectTaskCount(),
-    fetchInternalTaskCount(),
+    fetchProjectTaskCount(user.id),
+    fetchInternalTaskCount(user.id),
   ]);
 
   return (

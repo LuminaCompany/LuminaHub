@@ -4,6 +4,7 @@ import { Draggable } from "@hello-pangea/dnd";
 import type { Task } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarDays } from "lucide-react";
+import { usePermissions } from "@/components/permissions-provider";
 
 interface TaskCardProps {
   task: Task;
@@ -25,6 +26,7 @@ function formatDate(dateStr: string) {
 }
 
 export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
+  const { profile } = usePermissions();
   const priority = PRIORITY_STYLES[task.priority] ?? PRIORITY_STYLES.medium;
   const assignee = task.assignee ?? users.find((u) => u.id === task.assignee_id);
   const initials = assignee?.name
@@ -33,6 +35,10 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
     .map((n) => n[0])
     .join("")
     .toUpperCase() ?? "?";
+  const firstName = assignee?.name.split(" ")[0] ?? "";
+
+  // Task belongs to the current user → highlight with a cyan ring/glow.
+  const isMine = !!task.assignee_id && task.assignee_id === profile?.id;
 
   const isOverdue =
     task.due_date && new Date(task.due_date) < new Date() && !task.tags.includes("done");
@@ -49,8 +55,12 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
           style={{
             ...provided.draggableProps.style,
             backgroundColor: snapshot.isDragging ? "var(--surface-2)" : "var(--surface)",
-            border: "1px solid var(--border)",
-            boxShadow: snapshot.isDragging ? "0 8px 32px rgba(0,0,0,0.4)" : undefined,
+            border: isMine ? "1px solid var(--cyan)" : "1px solid var(--border)",
+            boxShadow: snapshot.isDragging
+              ? "0 8px 32px rgba(0,0,0,0.4)"
+              : isMine
+                ? "0 0 0 1px rgba(0,234,255,0.4), 0 0 12px rgba(0,234,255,0.15)"
+                : undefined,
           }}
         >
           {/* Priority chip */}
@@ -111,21 +121,29 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
             )}
 
             {assignee && (
-              <Avatar size="sm">
-                {assignee.avatar_url && (
-                  <AvatarImage src={assignee.avatar_url} alt={assignee.name} />
-                )}
-                <AvatarFallback
-                  style={{
-                    backgroundColor: "rgba(0,234,255,0.12)",
-                    color: "var(--cyan)",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "0.6rem",
-                  }}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Avatar size="sm">
+                  {assignee.avatar_url && (
+                    <AvatarImage src={assignee.avatar_url} alt={assignee.name} />
+                  )}
+                  <AvatarFallback
+                    style={{
+                      backgroundColor: "rgba(0,234,255,0.12)",
+                      color: "var(--cyan)",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "0.6rem",
+                    }}
+                  >
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <span
+                  className="text-[11px] truncate"
+                  style={{ color: isMine ? "var(--cyan)" : "var(--fg-2)" }}
                 >
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
+                  {firstName}
+                </span>
+              </div>
             )}
           </div>
         </div>

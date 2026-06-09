@@ -174,6 +174,30 @@ export function KanbanColumn({
                   />
                 ))}
                 {drop.placeholder}
+
+                {/* Ghost "add task" card — same role as add-column, but for tasks */}
+                {canCreate && (
+                  <button
+                    onClick={onTaskCreate}
+                    className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg text-xs transition-all"
+                    style={{
+                      backgroundColor: "rgba(255,255,255,0.02)",
+                      border: "1px dashed var(--border)",
+                      color: "var(--fg-3)",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,234,255,0.3)";
+                      (e.currentTarget as HTMLElement).style.color = "var(--cyan)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+                      (e.currentTarget as HTMLElement).style.color = "var(--fg-3)";
+                    }}
+                  >
+                    <Plus size={13} />
+                    Adicionar tarefa
+                  </button>
+                )}
               </div>
             )}
           </Droppable>
