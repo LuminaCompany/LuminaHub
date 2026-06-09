@@ -76,6 +76,13 @@ class TaskCounts(BaseModel):
     count: int
 
 
+class MyTaskCounts(BaseModel):
+    """Current user's task counts split by project vs internal (sidebar badges)."""
+
+    project_count: int
+    internal_count: int
+
+
 class TaskProject(BaseModel):
     """Lightweight project info attached to a task on the "Minhas Tarefas" view."""
 

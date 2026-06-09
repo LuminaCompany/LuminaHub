@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, File, UploadFile
 
-from app.core.auth import get_current_user
+from app.core.auth import get_current_user, invalidate_user, load_user
 from app.core.config import settings
 from app.core.exceptions import NotFoundError, ValidationError
 from app.db.client import get_supabase
@@ -20,18 +20,11 @@ async def get_me(
     """Return the current user's profile from the Supabase users table."""
     supabase = await get_supabase()
 
-    response = (
-        await supabase.table("users")
-        .select("*")
-        .eq("id", user_id)
-        .maybe_single()
-        .execute()
-    )
-
-    if response.data is None:
+    data = await load_user(supabase, user_id)
+    if data is None:
         raise NotFoundError("User profile not found")
 
-    return response.data
+    return data
 
 
 @router.patch("/me")
@@ -55,6 +48,7 @@ async def update_me(
     )
     if not response.data:
         raise NotFoundError("User profile not found")
+    invalidate_user(user_id)
     return response.data[0]
 
 
@@ -96,6 +90,7 @@ async def upload_avatar(
     )
     if not response.data:
         raise NotFoundError("User profile not found")
+    invalidate_user(user_id)
     return response.data[0]
 
 

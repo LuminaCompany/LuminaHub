@@ -4,6 +4,13 @@ import type { Profile } from "@/types";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
 
+/**
+ * Default Data Cache window for tagged fetches. Realtime (and a slow AutoRefresh
+ * fallback) drive freshness via tag purges + soft refresh, so a short revalidate
+ * is just a safety net — not the primary update path. Override per call as needed.
+ */
+export const DEFAULT_REVALIDATE = 2;
+
 async function getServerAuthHeaders(): Promise<Record<string, string>> {
   try {
     const supabase = await createClient();
@@ -27,7 +34,7 @@ export async function serverFetch<T>(
     method: "GET",
     headers: { "Content-Type": "application/json", ...authHeaders },
     next: {
-      revalidate: options?.revalidate ?? 60,
+      revalidate: options?.revalidate ?? DEFAULT_REVALIDATE,
       tags: options?.tags,
     },
   });
@@ -50,6 +57,10 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
   if (!authHeaders.Authorization) return null;
 
   try {
+    // Per-user identity endpoint — must NOT share a Data Cache entry across users
+    // (the cache key ignores the Authorization header), so keep it uncached.
+    // React `cache()` still dedups to one call per render, and the backend serves
+    // it from a short-lived in-process cache, so this stays cheap.
     const response = await fetch(`${BACKEND_URL}/api/v1/auth/me`, {
       method: "GET",
       headers: { "Content-Type": "application/json", ...authHeaders },

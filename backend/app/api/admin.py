@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import APIRouter, Depends
 
-from app.core.auth import Principal, require_manager
+from app.core.auth import Principal, invalidate_user, require_manager
 from app.core.exceptions import AppError, NotFoundError, ValidationError
 from app.core.permissions import catalog_payload, normalize, normalize_home_cards
 from app.db.client import get_supabase
@@ -120,6 +120,9 @@ async def update_user(
     )
     if not response.data:
         raise NotFoundError("User not found")
+    # Role/permission/home_card changes must take effect on the target's next
+    # request, not after the cache TTL.
+    invalidate_user(str(user_id))
     return response.data[0]
 
 
@@ -134,6 +137,7 @@ async def delete_user(
     supabase = await get_supabase()
     # Deleting the auth user cascades / we also drop the profile row explicitly.
     await supabase.table("users").delete().eq("id", str(user_id)).execute()
+    invalidate_user(str(user_id))
     try:
         await supabase.auth.admin.delete_user(str(user_id))
     except Exception:  # noqa: BLE001 — profile already gone; auth cleanup best-effort

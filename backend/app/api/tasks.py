@@ -9,6 +9,7 @@ from app.core.permissions import Action, Resource
 from app.core.pagination import PaginatedResponse
 from app.db.client import get_supabase
 from app.models.tasks import (
+    MyTaskCounts,
     MyTaskResponse,
     TaskCounts,
     TaskCreate,
@@ -75,6 +76,15 @@ async def get_task_counts(
     svc: TaskService = Depends(_svc),
 ) -> list[TaskCounts]:
     return await svc.get_counts()
+
+
+@router.get("/my-counts", response_model=MyTaskCounts)
+async def get_my_task_counts(
+    principal=Depends(require_permission(_R, Action.VIEW)),
+    svc: TaskService = Depends(_svc),
+) -> MyTaskCounts:
+    """Current user's project vs internal assigned-task counts (one aggregated query)."""
+    return await svc.get_my_counts(principal.id)
 
 
 @router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)

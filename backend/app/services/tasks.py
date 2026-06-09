@@ -12,9 +12,11 @@ from app.db.tasks import (
     db_list_my_tasks,
     db_list_tasks,
     db_move_task,
+    db_my_task_counts,
     db_update_task,
 )
 from app.models.tasks import (
+    MyTaskCounts,
     MyTaskResponse,
     TaskCounts,
     TaskCreate,
@@ -107,3 +109,7 @@ class TaskService:
     async def get_counts(self) -> list[TaskCounts]:
         rows = await db_count_tasks_by_assignee(self._sb)
         return [TaskCounts.model_validate(r) for r in rows]
+
+    async def get_my_counts(self, assignee_id: str) -> MyTaskCounts:
+        data = await db_my_task_counts(self._sb, assignee_id=assignee_id)
+        return MyTaskCounts.model_validate(data)

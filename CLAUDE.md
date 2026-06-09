@@ -9,7 +9,7 @@ ERP interno para gestão de projetos, tarefas, finanças, clientes e metas.
 
 ## Key Rules
 - Sempre usar componentes existentes (shadcn/ui, Reui) — nunca criar do zero
-- Caching/responsividade: todo `serverFetch` tagueado + `revalidate: 2`; toda mutação chama `revalidateCache([tags])` antes de `router.refresh()` (nunca só refresh); `<AutoRefresh>` no layout faz poll de 2s — componente com `useState(prop)` deve sincronizar via `useEffect`
+- Caching/responsividade: todo `serverFetch` tagueado + `revalidate: 2`; toda mutação chama `revalidateCache([tags])` antes de `router.refresh()` (nunca só refresh); atualização ao vivo via Realtime (`<RealtimeRefresh>`) + `<AutoRefresh>` 20s de fallback — componente com `useState(prop)` deve sincronizar via `useEffect`. Tabela nova ao vivo: publication + lista em realtime-refresh.tsx
 - `force-dynamic` + `revalidatePath` é **proibido**
 - Performance DB: agregação via RPC (nunca loop Python/JS), índice em toda FK, `SET search_path = ''` em funções; **não** particionar/cursor-paginate nesta escala
 - Interface em pt-BR, código/commits em inglês

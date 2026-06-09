@@ -150,11 +150,24 @@ async def db_delete_task(sb: AsyncClient, task_id: str) -> None:
 
 
 async def db_count_tasks_by_assignee(sb: AsyncClient) -> list[dict]:
-    """Return task counts grouped by assignee_id."""
-    response = await sb.table(_TABLE).select("assignee_id", count="exact").execute()
-    rows = response.data or []
-    counts: dict[str | None, int] = {}
-    for row in rows:
-        key = row.get("assignee_id")
-        counts[key] = counts.get(key, 0) + 1
-    return [{"assignee_id": k, "count": v} for k, v in counts.items()]
+    """Return task counts grouped by assignee_id.
+
+    Aggregated in Postgres via the `count_tasks_by_assignee` RPC (single GROUP BY)
+    instead of fetching every row and counting in Python.
+    """
+    response = await sb.rpc("count_tasks_by_assignee", {}).execute()
+    return response.data or []
+
+
+async def db_my_task_counts(sb: AsyncClient, *, assignee_id: str) -> dict:
+    """Return the current user's project vs internal task counts in one round-trip.
+
+    Delegates to the `my_task_counts` RPC — replaces the N+1 that listed every
+    project then fetched each project's columns just to count assigned tasks.
+    """
+    response = await sb.rpc("my_task_counts", {"p_user": assignee_id}).execute()
+    row = (response.data or [{}])[0]
+    return {
+        "project_count": int(row.get("project_count") or 0),
+        "internal_count": int(row.get("internal_count") or 0),
+    }

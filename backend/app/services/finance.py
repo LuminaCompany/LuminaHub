@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import calendar
 from datetime import date, datetime
 
@@ -37,10 +38,14 @@ class FinanceService:
         ytd_end = date(year, 12, 31)
         all_time_start = date(2000, 1, 1)
 
-        # 3 aggregated round-trips (was 5 row-fetching ones).
-        total_revenue, _ = await _totals(self.sb, all_time_start, ytd_end)
-        month_revenue, month_expenses = await _totals(self.sb, month_start, month_end)
-        ytd_revenue, ytd_expenses = await _totals(self.sb, ytd_start, ytd_end)
+        # 3 aggregated round-trips, fired concurrently (was 5 sequential).
+        (total_revenue, _), (month_revenue, month_expenses), (ytd_revenue, ytd_expenses) = (
+            await asyncio.gather(
+                _totals(self.sb, all_time_start, ytd_end),
+                _totals(self.sb, month_start, month_end),
+                _totals(self.sb, ytd_start, ytd_end),
+            )
+        )
 
         return {
             "period": period,
@@ -85,19 +90,24 @@ class FinanceService:
                 y -= 1
             months_back.append((y, m))
 
-        rolling_revenues = []
-        for y, m in months_back:
-            start = date(y, m, 1)
-            end = date(y, m, calendar.monthrange(y, m)[1])
-            rev, _ = await _totals(self.sb, start, end)
-            rolling_revenues.append(rev)
+        ytd_start = date(year, 1, 1)
+        ytd_end = date(year, current_month, calendar.monthrange(year, current_month)[1])
+
+        # Fire the 3 rolling months + YTD concurrently (was 4 sequential round-trips).
+        rolling_ranges = [
+            (date(y, m, 1), date(y, m, calendar.monthrange(y, m)[1]))
+            for y, m in months_back
+        ]
+        *rolling_pairs, ytd_pair = await asyncio.gather(
+            *(_totals(self.sb, start, end) for start, end in rolling_ranges),
+            _totals(self.sb, ytd_start, ytd_end),
+        )
+        rolling_revenues = [rev for rev, _ in rolling_pairs]
 
         avg = sum(rolling_revenues) / len(rolling_revenues) if rolling_revenues else 0.0
         months_remaining = max(0, 12 - current_month)
 
-        ytd_start = date(year, 1, 1)
-        ytd_end = date(year, current_month, calendar.monthrange(year, current_month)[1])
-        ytd_revenue, _ = await _totals(self.sb, ytd_start, ytd_end)
+        ytd_revenue = ytd_pair[0]
 
         projected = ytd_revenue + avg * months_remaining
 

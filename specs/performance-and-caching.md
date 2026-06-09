@@ -13,9 +13,9 @@ RLS é **bypassado no hot path** (backend usa service-role). Tabelas pequenas
 ## 1. Cache & responsividade (frontend)
 
 Modelo: **fetch tagueado + `revalidate` curto + purge da tag na mutação +
-auto-refresh por polling**. Resultado: a tua própria mudança aparece instantânea
-(read-your-own-writes); a mudança do outro usuário aparece em ≤ 2s (a página se
-atualiza sozinha).
+push via Realtime** (com poll lento de fallback). Resultado: a tua própria
+mudança aparece instantânea (read-your-own-writes); a mudança do outro usuário
+aparece em <200ms (push no evento de banco).
 
 ### Regras
 1. **Todo `serverFetch` leva `tags` + `revalidate: 2`.** Nunca deixar fetch sem
@@ -28,15 +28,26 @@ atualiza sozinha).
    sem `revalidateCache`. **Corrige adicionando a tag certa, não baixando o
    `revalidate`.**
 
-### Auto-refresh (polling 2s)
-- `frontend/src/components/auto-refresh.tsx` faz `router.refresh()` a cada 2s
-  (soft refresh — preserva estado/scroll; pausa quando a aba está oculta).
-  Montado uma vez no layout do dashboard. Com `revalidate: 2`, cada poll busca
-  dado fresco.
-- **Gotcha:** componente que guarda dado de servidor em `useState(prop)` NÃO
-  reage ao soft refresh (só re-monta no F5). Se criar um, **sincronize via
-  `useEffect(() => setX(prop), [prop])`** (ver ProjectBoard, InternalBoard,
-  FinanceDashboard). Sem isso, a aba "só atualiza no F5".
+### Atualização ao vivo (Realtime + fallback)
+- **Primário — push:** `frontend/src/components/realtime-refresh.tsx` assina
+  `postgres_changes` das tabelas (publication `supabase_realtime`, migration 016)
+  e faz `router.refresh()` no evento (debounce 150ms). Aparece em <200ms, zero
+  request enquanto nada muda. Tabela nova p/ aparecer ao vivo: adicionar ao
+  publication **e** à lista `TABLES` em `realtime-refresh.tsx`.
+- **Fallback — poll lento:** `auto-refresh.tsx` faz `router.refresh()` a cada 20s
+  (pausa em aba oculta), caso o websocket caia.
+- `revalidate: 2` garante que o refresh disparado busque dado fresco.
+- **Gotcha (continua valendo):** componente que guarda dado de servidor em
+  `useState(prop)` NÃO reage ao soft refresh (só re-monta no F5). Sincronize via
+  `useEffect(() => setX(prop), [prop])` (ProjectBoard, InternalBoard,
+  FinanceDashboard). Sem isso, "só atualiza no F5".
+
+### Região (latência — alavanca invisível)
+- Vercel functions default = `iad1` (US-East). Se o Supabase está em outra região
+  (ex.: São Paulo `sa-east-1`), cada query paga latência cross-region ×N por
+  request. **Conferir** a região no dashboard Supabase (Settings → General) e
+  alinhar a função Vercel: `vercel.json` → `"regions": ["gru1"]` (São Paulo).
+  Só vale se ambos ficarem na mesma região.
 
 ### Onde fica
 - Tags: `frontend/src/lib/cache.ts` (`CACHE_TAGS`).

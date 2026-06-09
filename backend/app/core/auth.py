@@ -1,8 +1,10 @@
+import time
 from dataclasses import dataclass
 
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+from supabase._async.client import AsyncClient
 
 from app.core.config import settings
 from app.core.exceptions import AuthenticationError, ForbiddenError, NotFoundError
@@ -12,6 +14,41 @@ from app.db.client import get_supabase
 _bearer = HTTPBearer(auto_error=False)
 
 _ALGORITHM = "HS256"
+
+# In-process cache of user profile rows. The same row backs /auth/me, the
+# middleware permission check and every authorized request's permission gate —
+# caching it for a short TTL removes a per-request SELECT from the hot path.
+# Writes call `invalidate_user` so the owner sees their own changes immediately.
+_USER_CACHE: dict[str, tuple[float, dict]] = {}
+_USER_CACHE_TTL = 30.0  # seconds
+_USER_SELECT = (
+    "id, name, email, avatar_url, role, permissions, home_cards, "
+    "created_at, updated_at"
+)
+
+
+async def load_user(sb: AsyncClient, user_id: str) -> dict | None:
+    """Return a user's profile row, served from a short-lived in-process cache."""
+    now = time.monotonic()
+    hit = _USER_CACHE.get(user_id)
+    if hit and now - hit[0] < _USER_CACHE_TTL:
+        return hit[1]
+    resp = (
+        await sb.table("users")
+        .select(_USER_SELECT)
+        .eq("id", user_id)
+        .maybe_single()
+        .execute()
+    )
+    data = resp.data
+    if data:
+        _USER_CACHE[user_id] = (now, data)
+    return data
+
+
+def invalidate_user(user_id: str) -> None:
+    """Drop a user's cached profile so the next read reflects a just-made write."""
+    _USER_CACHE.pop(user_id, None)
 
 
 async def get_current_user(
@@ -74,14 +111,7 @@ async def get_current_principal(
 ) -> Principal:
     """Load the current user's profile (role + permissions) for authorization."""
     supabase = await get_supabase()
-    response = (
-        await supabase.table("users")
-        .select("id, name, email, role, permissions")
-        .eq("id", user_id)
-        .maybe_single()
-        .execute()
-    )
-    data = response.data
+    data = await load_user(supabase, user_id)
     if not data:
         raise NotFoundError("User profile not found")
 
