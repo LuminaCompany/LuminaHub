@@ -20,9 +20,23 @@ const PRIORITY_STYLES: Record<string, { bg: string; color: string; label: string
   low:    { bg: "rgba(46,68,71,0.5)",   color: "var(--fg-3)",        label: "BAIXA" },
 };
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+function startOfWeek(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - x.getDay()); // back to Sunday
+  return x;
+}
+
+/** Same week → "Até <weekday>"; otherwise the short date. */
+function formatDue(due: Date, now: Date): string {
+  const sow = startOfWeek(now);
+  const eow = new Date(sow);
+  eow.setDate(eow.getDate() + 6);
+  eow.setHours(23, 59, 59, 999);
+  if (due >= sow && due <= eow) {
+    return "Até " + due.toLocaleDateString("pt-BR", { weekday: "long" });
+  }
+  return due.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 }
 
 export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
@@ -40,8 +54,13 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
   // Task belongs to the current user → highlight with a cyan ring/glow.
   const isMine = !!task.assignee_id && task.assignee_id === profile?.id;
 
-  const isOverdue =
-    task.due_date && new Date(task.due_date) < new Date() && !task.tags.includes("done");
+  const now = new Date();
+  const due = task.due_date ? new Date(task.due_date + "T00:00:00") : null;
+  // Red when ≤24h remain (or already overdue) and not done.
+  const isUrgent =
+    !!due &&
+    !task.tags.includes("done") &&
+    due.getTime() - now.getTime() <= 24 * 60 * 60 * 1000;
 
   return (
     <Draggable draggableId={task.id} index={index}>
@@ -55,11 +74,11 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
           style={{
             ...provided.draggableProps.style,
             backgroundColor: snapshot.isDragging ? "var(--surface-2)" : "var(--surface)",
-            border: isMine ? "1px solid var(--cyan)" : "1px solid var(--border)",
+            border: isMine ? "1px solid rgba(0,234,255,0.5)" : "1px solid var(--border)",
             boxShadow: snapshot.isDragging
               ? "0 8px 32px rgba(0,0,0,0.4)"
               : isMine
-                ? "0 0 0 1px rgba(0,234,255,0.4), 0 0 12px rgba(0,234,255,0.15)"
+                ? "0 0 0 0.7px rgba(0,234,255,0.28), 0 0 8px rgba(0,234,255,0.1)"
                 : undefined,
           }}
         >
@@ -105,16 +124,16 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
 
           {/* Footer: due date + assignee */}
           <div className="flex items-center justify-between mt-1">
-            {task.due_date ? (
+            {due ? (
               <span
                 className="flex items-center gap-1 text-[11px]"
                 style={{
-                  color: isOverdue ? "var(--negative)" : "var(--fg-2)",
+                  color: isUrgent ? "var(--negative)" : "var(--fg-2)",
                   fontFamily: "var(--font-mono)",
                 }}
               >
                 <CalendarDays size={10} />
-                {formatDate(task.due_date)}
+                {formatDue(due, now)}
               </span>
             ) : (
               <span />
