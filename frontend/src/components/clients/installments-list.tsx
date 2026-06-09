@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { PaymentInstallment } from "@/types";
 
 interface InstallmentsListProps {
@@ -94,6 +96,13 @@ function MarkPaidButton({ installmentId }: MarkPaidButtonProps) {
     setError(null);
     try {
       await api.patch(`/api/v1/installments/${installmentId}/pay`, {});
+      await revalidateCache([
+        CACHE_TAGS.clients,
+        CACHE_TAGS.services,
+        CACHE_TAGS.transactions,
+        CACHE_TAGS.home,
+        CACHE_TAGS.goals,
+      ]);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao marcar como pago");

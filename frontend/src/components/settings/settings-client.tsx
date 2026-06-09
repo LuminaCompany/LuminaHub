@@ -29,6 +29,8 @@ import {
   HOME_CARD_LABELS,
 } from "@/lib/permissions";
 import { api, ApiError } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { HomeCards, PermissionMap, Role, User } from "@/types";
 import type { CatalogEntry } from "@/app/(dashboard)/settings/page";
 
@@ -133,6 +135,7 @@ function UserRow({
     setDeleting(true);
     try {
       await api.delete(`/api/v1/admin/users/${user.id}`);
+      await revalidateCache([CACHE_TAGS.users]);
       startTransition(() => router.refresh());
     } catch (e) {
       alert(e instanceof ApiError ? e.message : "Erro ao excluir usuário.");
@@ -228,6 +231,7 @@ function PermissionsEditor({
         permissions: role === "manager" ? {} : perms,
         home_cards: homeCards,
       });
+      await revalidateCache([CACHE_TAGS.users]);
       onSaved();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Erro ao salvar permissões.");

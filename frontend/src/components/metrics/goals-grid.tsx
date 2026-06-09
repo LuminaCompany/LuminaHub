@@ -6,7 +6,8 @@ import { GoalCard } from "@/components/metrics/goal-card";
 import { GoalForm } from "@/components/metrics/goal-form";
 import { usePermissions } from "@/components/permissions-provider";
 import { api } from "@/lib/api";
-import { revalidateGoalsAction } from "@/actions/cache";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { Goal } from "@/types";
 
 interface GoalsGridProps {
@@ -23,6 +24,7 @@ export function GoalsGrid({ goals }: GoalsGridProps) {
   async function handleComplete(id: string) {
     try {
       await api.post(`/api/v1/goals/${id}/complete`, {});
+      await revalidateCache([CACHE_TAGS.goals, CACHE_TAGS.home]);
       router.refresh();
     } catch {
       // silent — user can retry
@@ -33,7 +35,7 @@ export function GoalsGrid({ goals }: GoalsGridProps) {
     if (!confirm(`Excluir a meta "${goal.name}"?`)) return;
     try {
       await api.delete(`/api/v1/goals/${goal.id}`);
-      await revalidateGoalsAction();
+      await revalidateCache([CACHE_TAGS.goals, CACHE_TAGS.home]);
       router.refresh();
     } catch {
       // silent — user can retry

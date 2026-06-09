@@ -19,7 +19,7 @@ async function fetchProjectTaskCount(userId: string): Promise<number> {
   try {
     const projects = await serverFetch<{ id: string }[]>("/api/v1/projects", {
       tags: [CACHE_TAGS.projects],
-      revalidate: 120,
+      revalidate: 5,
     });
     if (!projects.length) return 0;
 
@@ -27,7 +27,7 @@ async function fetchProjectTaskCount(userId: string): Promise<number> {
       projects.map((p) =>
         serverFetch<Column[]>(`/api/v1/projects/${p.id}/columns`, {
           tags: [CACHE_TAGS.projects],
-          revalidate: 120,
+          revalidate: 5,
         })
       )
     );
@@ -41,7 +41,7 @@ async function fetchInternalTaskCount(userId: string): Promise<number> {
   try {
     const columns = await serverFetch<Column[]>("/api/v1/columns/internal", {
       tags: [CACHE_TAGS.internalTasks],
-      revalidate: 120,
+      revalidate: 5,
     });
     return countOwnTasks(columns, userId);
   } catch {

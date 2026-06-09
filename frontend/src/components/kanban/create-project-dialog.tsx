@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
@@ -34,6 +36,7 @@ export function CreateProjectDialog({ trigger, onCreated }: CreateProjectDialogP
     setError("");
     try {
       await api.post("/api/v1/projects", { name: trimmed });
+      await revalidateCache([CACHE_TAGS.projects]);
       setName("");
       setOpen(false);
       if (onCreated) onCreated();

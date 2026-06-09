@@ -4,10 +4,14 @@ import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { Column, Task } from "@/types";
 import { api } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import { KanbanBoard } from "./kanban-board";
 import { ProjectHeader } from "./project-header";
 import { AddColumnInline } from "./add-column-inline";
 import { TaskForm } from "./task-form";
+
+const BOARD_TAGS = [CACHE_TAGS.projects, CACHE_TAGS.tasks, CACHE_TAGS.home];
 
 interface FilterState {
   assigneeId: string;
@@ -45,7 +49,10 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const refresh = useCallback(() => {
-    startTransition(() => router.refresh());
+    startTransition(async () => {
+      await revalidateCache(BOARD_TAGS);
+      router.refresh();
+    });
   }, [router]);
 
   async function handleTaskMove(taskId: string, _src: string, destColumnId: string, newPosition: number) {
@@ -62,6 +69,7 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
     });
     try {
       await api.patch(`/api/v1/tasks/${taskId}/move`, { column_id: destColumnId, position: newPosition });
+      await revalidateCache(BOARD_TAGS);
     } catch { refresh(); }
   }
 
@@ -72,6 +80,7 @@ export function ProjectBoard({ projectId, projectName, initialColumns, users }: 
     });
     try {
       await api.patch("/api/v1/columns/reorder", { column_ids: columnIds });
+      await revalidateCache(BOARD_TAGS);
     } catch { refresh(); }
   }
 

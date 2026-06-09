@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import { paymentSchema, type PaymentFormData } from "@/lib/validations/clients";
 
 interface PaymentFormProps {
@@ -72,6 +74,7 @@ export function PaymentForm({ serviceId, trigger }: PaymentFormProps) {
     setServerError(null);
     try {
       await api.post("/api/v1/service-payments", data);
+      await revalidateCache([CACHE_TAGS.clients, CACHE_TAGS.services]);
       setOpen(false);
       reset();
       router.refresh();

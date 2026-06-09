@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/types";
 
@@ -42,6 +44,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
     try {
       await api.patch("/api/v1/auth/me", { name: name.trim() });
       setMsg("Nome atualizado.");
+      await revalidateCache([CACHE_TAGS.users]);
       startTransition(() => router.refresh());
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Erro ao salvar o nome.");
@@ -74,6 +77,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
       const data = await res.json();
       setAvatarUrl(data.avatar_url ?? null);
       setMsg("Foto atualizada.");
+      await revalidateCache([CACHE_TAGS.users]);
       startTransition(() => router.refresh());
     } catch {
       setError("Erro ao enviar a foto. Use uma imagem de até alguns MB.");

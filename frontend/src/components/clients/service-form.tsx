@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import {
   serviceSchema,
   SERVICE_TYPES,
@@ -86,6 +88,7 @@ export function ServiceForm({ clientId, service, trigger }: ServiceFormProps) {
       } else {
         await api.post("/api/v1/services", data);
       }
+      await revalidateCache([CACHE_TAGS.clients, CACHE_TAGS.services]);
       setOpen(false);
       reset();
       router.refresh();

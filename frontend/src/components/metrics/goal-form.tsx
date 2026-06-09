@@ -25,7 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
-import { revalidateGoalsAction } from "@/actions/cache";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { Goal } from "@/types";
 
 const schema = z
@@ -123,7 +124,7 @@ export function GoalForm({ onSuccess, trigger, goal, open: openProp, onOpenChang
       } else {
         await api.post("/api/v1/goals", payload);
       }
-      await revalidateGoalsAction();
+      await revalidateCache([CACHE_TAGS.goals, CACHE_TAGS.home]);
       if (!isEdit) reset();
       setOpen(false);
       onSuccess?.();

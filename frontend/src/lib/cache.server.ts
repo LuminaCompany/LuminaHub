@@ -38,6 +38,10 @@ export function revalidateInternalTasks() {
   revalidateTag(CACHE_TAGS.internalTasks, DEFAULT_PROFILE);
 }
 
+export function revalidateUsers() {
+  revalidateTag(CACHE_TAGS.users, DEFAULT_PROFILE);
+}
+
 export function cachedFetch<T>(
   fn: () => Promise<T>,
   keyParts: string[],

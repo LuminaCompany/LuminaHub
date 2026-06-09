@@ -33,28 +33,28 @@ const MONTH = now.getMonth() + 1;
 async function fetchSummary(): Promise<SummaryResponse> {
   return serverFetch<SummaryResponse>(
     `/api/v1/finance/summary?period=month&year=${YEAR}&month=${MONTH}`,
-    { tags: [CACHE_TAGS.transactions], revalidate: 60 }
+    { tags: [CACHE_TAGS.transactions], revalidate: 5 }
   );
 }
 
 async function fetchChart(): Promise<ChartDataPoint[]> {
   return serverFetch<ChartDataPoint[]>(
     `/api/v1/finance/chart?type=monthly&year=${YEAR}`,
-    { tags: [CACHE_TAGS.transactions], revalidate: 60 }
+    { tags: [CACHE_TAGS.transactions], revalidate: 5 }
   );
 }
 
 async function fetchProjection(): Promise<ProjectionResponse> {
   return serverFetch<ProjectionResponse>(
     `/api/v1/finance/projection?year=${YEAR}`,
-    { tags: [CACHE_TAGS.transactions], revalidate: 60 }
+    { tags: [CACHE_TAGS.transactions], revalidate: 5 }
   );
 }
 
 async function fetchSplit(): Promise<SplitResponse> {
   return serverFetch<SplitResponse>(
     `/api/v1/finance/split?from=${YEAR}-01-01&to=${YEAR}-12-31`,
-    { tags: [CACHE_TAGS.transactions], revalidate: 60 }
+    { tags: [CACHE_TAGS.transactions], revalidate: 5 }
   );
 }
 

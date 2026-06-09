@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { api } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 
 type UploadMode = "file" | "url";
 
@@ -106,6 +108,7 @@ export function ContractUpload({ clientId, trigger }: ContractUploadProps) {
         url: null,
       });
 
+      await revalidateCache([CACHE_TAGS.clients]);
       setOpen(false);
       router.refresh();
     } catch (err) {
@@ -138,6 +141,7 @@ export function ContractUpload({ clientId, trigger }: ContractUploadProps) {
         url: urlValue.trim(),
       });
 
+      await revalidateCache([CACHE_TAGS.clients]);
       setOpen(false);
       router.refresh();
     } catch (err) {

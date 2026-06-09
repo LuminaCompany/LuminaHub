@@ -19,6 +19,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { api, ApiError } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import type { Role } from "@/types";
 
 export function UserCreateDialog({ trigger }: { trigger: React.ReactNode }) {
@@ -55,6 +57,7 @@ export function UserCreateDialog({ trigger }: { trigger: React.ReactNode }) {
         role,
         permissions: {},
       });
+      await revalidateCache([CACHE_TAGS.users]);
       setOpen(false);
       reset();
       startTransition(() => router.refresh());

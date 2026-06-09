@@ -25,6 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
+import { revalidateCache } from "@/actions/cache";
+import { CACHE_TAGS } from "@/lib/cache";
 import { clientSchema, type ClientFormData } from "@/lib/validations/clients";
 import type { Client } from "@/types";
 
@@ -67,6 +69,7 @@ export function ClientForm({ client, trigger }: ClientFormProps) {
       } else {
         await api.post("/api/v1/clients", data);
       }
+      await revalidateCache([CACHE_TAGS.clients]);
       setOpen(false);
       reset();
       router.refresh();

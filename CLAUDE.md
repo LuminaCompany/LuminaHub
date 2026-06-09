@@ -9,10 +9,13 @@ ERP interno para gestão de projetos, tarefas, finanças, clientes e metas.
 
 ## Key Rules
 - Sempre usar componentes existentes (shadcn/ui, Reui) — nunca criar do zero
-- Caching: `unstable_cache` + `revalidateTag` + `loading.tsx` em todas as rotas
+- Caching/responsividade: todo `serverFetch` tagueado + `revalidate: 5`; toda mutação chama `revalidateCache([tags])` antes de `router.refresh()` (nunca só refresh)
 - `force-dynamic` + `revalidatePath` é **proibido**
+- Performance DB: agregação via RPC (nunca loop Python/JS), índice em toda FK, `SET search_path = ''` em funções; **não** particionar/cursor-paginate nesta escala
 - Interface em pt-BR, código/commits em inglês
-- Todas as tabelas DEVEM ter `created_at`, `updated_at` (timestamptz)
+- Todas as tabelas DEVEM ter `created_at`, `updated_at` (timestamptz) + RLS + trigger `update_updated_at`
+
+**Performance & Caching (obrigatório p/ mudanças em dados/DB)**: [specs/performance-and-caching.md](specs/performance-and-caching.md)
 
 <!-- SPECKIT START -->
 **Active Feature Plan**: [specs/001-luminahub-erp/plan.md](specs/001-luminahub-erp/plan.md)
