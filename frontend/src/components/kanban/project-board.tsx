@@ -10,6 +10,7 @@ import { KanbanBoard } from "./kanban-board";
 import { ProjectHeader } from "./project-header";
 import { AddColumnInline } from "./add-column-inline";
 import { TaskForm } from "./task-form";
+import { colorTint } from "@/lib/kanban-colors";
 
 const BOARD_TAGS = [CACHE_TAGS.projects, CACHE_TAGS.tasks, CACHE_TAGS.home];
 
@@ -138,8 +139,19 @@ export function ProjectBoard({ projectId, projectName, projectColor, initialColu
 
   const filteredColumns = applyFilters(columns, filters);
 
+  // Color tints the whole project section with a top→bottom gradient.
+  const tinted = !!projectColor;
+  const sectionStyle = tinted
+    ? {
+        background: `linear-gradient(180deg, ${colorTint(projectColor!, 0.35)} 0%, ${colorTint(projectColor!, 0.04)} 100%)`,
+        border: `1px solid ${colorTint(projectColor!, 0.3)}`,
+        borderRadius: 16,
+        padding: 20,
+      }
+    : undefined;
+
   return (
-    <div>
+    <div style={sectionStyle}>
       <ProjectHeader
         name={projectName}
         color={projectColor}

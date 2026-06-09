@@ -67,14 +67,6 @@ export function ProjectHeader({
     <div className="flex flex-col gap-3 mb-4">
       {/* Title row */}
       <div className="flex items-center gap-3">
-        {/* Accent color */}
-        {color && (
-          <span
-            className="rounded-full shrink-0"
-            style={{ width: 12, height: 12, backgroundColor: color }}
-          />
-        )}
-
         {editing ? (
           <div className="flex items-center gap-2">
             <Input

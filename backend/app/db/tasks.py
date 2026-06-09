@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import date, timedelta
+
 from supabase._async.client import AsyncClient
 
 from app.models.tasks import TaskCreate, TaskMove, TaskUpdate
@@ -7,6 +9,12 @@ from app.models.tasks import TaskCreate, TaskMove, TaskUpdate
 _TABLE = "tasks"
 # Embed assignee WITHOUT email — collaborators must not receive others' emails.
 _TASK_SELECT = "*, assignee:users(id, name, avatar_url)"
+# Same as above plus the column → project chain so the "Minhas Tarefas" view can
+# label each task with its project (project null = internal task).
+_MY_TASK_SELECT = (
+    "*, assignee:users(id, name, avatar_url), "
+    "column:columns(id, name, project_id, project:projects(id, name, color))"
+)
 
 
 async def db_list_tasks(
@@ -32,6 +40,70 @@ async def db_list_tasks(
     query = query.order("position").range(offset, offset + limit - 1)
     response = await query.execute()
     return response.data or [], response.count or 0
+
+
+async def db_list_my_tasks(
+    sb: AsyncClient,
+    *,
+    assignee_id: str,
+    priority: str | None = None,
+    due: str | None = None,
+    project_id: str | None = None,
+    tag: str | None = None,
+    q: str | None = None,
+    include_internal: bool = True,
+) -> list[dict]:
+    """List every task assigned to ``assignee_id``, enriched with its project.
+
+    ``due`` is a bucket: ``overdue`` | ``today`` | ``week`` | ``month`` | ``none``.
+    ``include_internal=False`` drops tasks whose column has no project.
+    """
+    query = sb.table(_TABLE).select(_MY_TASK_SELECT).eq("assignee_id", assignee_id)
+
+    if priority:
+        priorities = [p.strip() for p in priority.split(",") if p.strip()]
+        query = query.in_("priority", priorities)
+    if tag:
+        query = query.contains("tags", [tag])
+    if q:
+        query = query.ilike("title", f"%{q}%")
+
+    today = date.today()
+    if due == "overdue":
+        query = query.lt("due_date", today.isoformat())
+    elif due == "today":
+        query = query.eq("due_date", today.isoformat())
+    elif due == "week":
+        query = query.gte("due_date", today.isoformat()).lte(
+            "due_date", (today + timedelta(days=7)).isoformat()
+        )
+    elif due == "month":
+        query = query.gte("due_date", today.isoformat()).lte(
+            "due_date", (today + timedelta(days=30)).isoformat()
+        )
+    elif due == "none":
+        query = query.is_("due_date", "null")
+
+    # ASC puts NULL due dates last (Postgres default); the frontend re-sorts too.
+    query = query.order("due_date", desc=False).order("position")
+    response = await query.execute()
+    rows = response.data or []
+
+    # Flatten the embedded column → project chain into project / column_name, and
+    # apply the project / internal filters that are awkward to express on the
+    # embedded relation. The list is per-user and small, so this is not a hot loop.
+    result: list[dict] = []
+    for row in rows:
+        column = row.pop("column", None) or {}
+        project = column.get("project")
+        row["project"] = project
+        row["column_name"] = column.get("name")
+        if not include_internal and project is None:
+            continue
+        if project_id and (project or {}).get("id") != project_id:
+            continue
+        result.append(row)
+    return result
 
 
 async def db_get_task(sb: AsyncClient, task_id: str) -> dict | None:

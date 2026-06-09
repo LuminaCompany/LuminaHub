@@ -21,9 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { api } from "@/lib/api";
-import { ColorPicker } from "./color-picker";
 
 const schema = z.object({
   title: z.string().min(1, "Título obrigatório").max(500),
@@ -32,8 +30,6 @@ const schema = z.object({
   assignee_id: z.string().optional(),
   due_date: z.string().optional(),
   tags: z.string().optional(),
-  color: z.string().nullable().optional(),
-  cover: z.boolean().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -59,8 +55,6 @@ export function TaskForm({ open, onOpenChange, columnId, task, users, onSuccess 
       assignee_id: "",
       due_date: "",
       tags: "",
-      color: null,
-      cover: false,
     },
   });
 
@@ -73,8 +67,6 @@ export function TaskForm({ open, onOpenChange, columnId, task, users, onSuccess 
         assignee_id: task?.assignee_id ?? "",
         due_date: task?.due_date ?? "",
         tags: task?.tags.join(", ") ?? "",
-        color: task?.color ?? null,
-        cover: task?.cover ?? false,
       });
     }
   }, [open, task, reset]);
@@ -91,8 +83,6 @@ export function TaskForm({ open, onOpenChange, columnId, task, users, onSuccess 
       assignee_id: values.assignee_id || null,
       due_date: values.due_date || null,
       tags,
-      color: values.color ?? null,
-      cover: values.cover ?? false,
       ...(isEdit ? {} : { column_id: columnId }),
     };
 
@@ -194,30 +184,6 @@ export function TaskForm({ open, onOpenChange, columnId, task, users, onSuccess 
           <div>
             <label style={labelStyle}>Tags (separadas por vírgula)</label>
             <Input {...register("tags")} placeholder="design, frontend, urgente" style={inputStyle} />
-          </div>
-
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Cor do card</label>
-              <Controller
-                name="color"
-                control={control}
-                render={({ field }) => (
-                  <ColorPicker value={field.value ?? null} onChange={field.onChange} size={22} />
-                )}
-              />
-            </div>
-
-            <Controller
-              name="cover"
-              control={control}
-              render={({ field }) => (
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <span style={{ ...labelStyle, marginBottom: 0 }}>Capa colorida</span>
-                  <Switch checked={!!field.value} onCheckedChange={field.onChange} />
-                </label>
-              )}
-            />
           </div>
 
           <DialogFooter className="mt-2">

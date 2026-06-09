@@ -70,7 +70,7 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={onClick}
-          className="rounded-xl cursor-pointer transition-all group overflow-hidden"
+          className="rounded-xl p-3 cursor-pointer transition-all group"
           style={{
             ...provided.draggableProps.style,
             backgroundColor: snapshot.isDragging ? "var(--surface-2)" : "var(--surface)",
@@ -82,20 +82,6 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
                 : undefined,
           }}
         >
-          {/* Colored cover band (Trello-style) */}
-          {task.cover && task.color && (
-            <div style={{ height: 8, backgroundColor: task.color }} />
-          )}
-
-          <div className="p-3">
-          {/* Color label (when not a full cover) */}
-          {task.color && !task.cover && (
-            <span
-              className="block rounded-full mb-2"
-              style={{ width: 36, height: 6, backgroundColor: task.color }}
-            />
-          )}
-
           {/* Priority chip */}
           <span
             className="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded mb-2 uppercase"
@@ -178,7 +164,6 @@ export function TaskCard({ task, index, users, onClick }: TaskCardProps) {
                 </span>
               </div>
             )}
-          </div>
           </div>
         </div>
       )}

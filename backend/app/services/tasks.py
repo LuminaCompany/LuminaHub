@@ -9,11 +9,13 @@ from app.db.tasks import (
     db_create_task,
     db_delete_task,
     db_get_task,
+    db_list_my_tasks,
     db_list_tasks,
     db_move_task,
     db_update_task,
 )
 from app.models.tasks import (
+    MyTaskResponse,
     TaskCounts,
     TaskCreate,
     TaskMove,
@@ -48,6 +50,29 @@ class TaskService:
         )
         data = [TaskResponse.model_validate(r) for r in rows]
         return build_paginated_response(data, total, page, per_page)
+
+    async def list_my_tasks(
+        self,
+        assignee_id: str,
+        *,
+        priority: str | None = None,
+        due: str | None = None,
+        project_id: str | None = None,
+        tag: str | None = None,
+        q: str | None = None,
+        include_internal: bool = True,
+    ) -> list[MyTaskResponse]:
+        rows = await db_list_my_tasks(
+            self._sb,
+            assignee_id=assignee_id,
+            priority=priority,
+            due=due,
+            project_id=project_id,
+            tag=tag,
+            q=q,
+            include_internal=include_internal,
+        )
+        return [MyTaskResponse.model_validate(r) for r in rows]
 
     async def create_task(self, payload: TaskCreate) -> TaskResponse:
         row = await db_create_task(self._sb, payload)

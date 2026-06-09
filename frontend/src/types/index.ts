@@ -102,6 +102,14 @@ export interface Task {
   updated_at: string
 }
 
+/** A task assigned to the current user, enriched with its project. */
+export interface MyTask extends Task {
+  /** Project the task belongs to; `null` for internal tasks. */
+  project: { id: string; name: string; color: string | null } | null
+  /** Kanban column the task currently sits in. */
+  column_name: string | null
+}
+
 // ── Clients ──
 export type ClientStatus = "active" | "inactive"
 

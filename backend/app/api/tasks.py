@@ -8,7 +8,14 @@ from app.core.auth import require_permission
 from app.core.permissions import Action, Resource
 from app.core.pagination import PaginatedResponse
 from app.db.client import get_supabase
-from app.models.tasks import TaskCounts, TaskCreate, TaskMove, TaskResponse, TaskUpdate
+from app.models.tasks import (
+    MyTaskResponse,
+    TaskCounts,
+    TaskCreate,
+    TaskMove,
+    TaskResponse,
+    TaskUpdate,
+)
 from app.services.tasks import TaskService
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
@@ -37,6 +44,28 @@ async def list_tasks(
         assignee_id=assignee_id,
         priority=priority,
         tag=tag,
+    )
+
+
+@router.get("/mine", response_model=list[MyTaskResponse])
+async def list_my_tasks(
+    priority: str | None = Query(default=None),
+    due: str | None = Query(default=None),
+    project_id: str | None = Query(default=None),
+    tag: str | None = Query(default=None),
+    q: str | None = Query(default=None),
+    include_internal: bool = Query(default=True),
+    principal=Depends(require_permission(_R, Action.VIEW)),
+    svc: TaskService = Depends(_svc),
+) -> list[MyTaskResponse]:
+    return await svc.list_my_tasks(
+        principal.id,
+        priority=priority,
+        due=due,
+        project_id=project_id,
+        tag=tag,
+        q=q,
+        include_internal=include_internal,
     )
 
 

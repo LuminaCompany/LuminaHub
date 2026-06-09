@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { usePermissions } from "@/components/permissions-provider";
+import { colorTint } from "@/lib/kanban-colors";
 
 interface KanbanColumnProps {
   column: Column;
@@ -48,6 +49,14 @@ export function KanbanColumn({
   const canEdit = can("tasks", "edit");
   const canDelete = can("tasks", "delete");
 
+  // When a color is set, the whole column takes a top→bottom gradient of it
+  // (Trello-style); header/body go transparent so the gradient is continuous.
+  const tinted = !!column.color;
+  const columnBg = tinted
+    ? `linear-gradient(180deg, ${colorTint(column.color!, 0.55)} 0%, ${colorTint(column.color!, 0.1)} 100%)`
+    : undefined;
+  const tintBorder = tinted ? colorTint(column.color!, 0.4) : "var(--border)";
+
   function handleRename() {
     if (nameValue.trim()) {
       onRename(nameValue.trim());
@@ -67,28 +76,23 @@ export function KanbanColumn({
             width: 280,
             minWidth: 280,
             flexShrink: 0,
+            background: columnBg,
+            border: tinted ? `1px solid ${tintBorder}` : undefined,
+            borderRadius: tinted ? 12 : undefined,
+            overflow: "hidden",
           }}
         >
           {/* Column header */}
           <div
             className="flex items-center justify-between px-3 py-2.5 rounded-t-xl"
             style={{
-              backgroundColor: "var(--surface-2)",
-              border: "1px solid var(--border)",
+              backgroundColor: tinted ? "transparent" : "var(--surface-2)",
+              border: tinted ? "none" : "1px solid var(--border)",
               borderBottom: "none",
-              borderTop: column.color
-                ? `3px solid ${column.color}`
-                : "1px solid var(--border)",
             }}
             {...provided.dragHandleProps}
           >
             <div className="flex items-center gap-2 min-w-0">
-              {column.color && (
-                <span
-                  className="rounded-full shrink-0"
-                  style={{ width: 9, height: 9, backgroundColor: column.color }}
-                />
-              )}
               <span
                 className="text-sm font-medium truncate"
                 style={{ color: "var(--fg-1)" }}
@@ -173,9 +177,9 @@ export function KanbanColumn({
                 className="flex flex-col gap-2 p-2 rounded-b-xl min-h-16 transition-colors"
                 style={{
                   backgroundColor: snapshot.isDraggingOver
-                    ? "rgba(0,234,255,0.04)"
-                    : "var(--surface)",
-                  border: "1px solid var(--border)",
+                    ? tinted ? "rgba(255,255,255,0.06)" : "rgba(0,234,255,0.04)"
+                    : tinted ? "transparent" : "var(--surface)",
+                  border: tinted ? "none" : "1px solid var(--border)",
                   borderTop: "none",
                 }}
               >

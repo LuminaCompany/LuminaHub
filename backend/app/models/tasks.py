@@ -74,3 +74,24 @@ class TaskCounts(BaseModel):
 
     assignee_id: str | None
     count: int
+
+
+class TaskProject(BaseModel):
+    """Lightweight project info attached to a task on the "Minhas Tarefas" view."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    color: str | None = None
+
+
+class MyTaskResponse(TaskResponse):
+    """A task assigned to the current user, enriched with its project.
+
+    ``project`` is ``None`` for internal tasks (column with ``project_id`` null).
+    ``column_name`` carries the kanban column the task currently sits in.
+    """
+
+    project: TaskProject | None = None
+    column_name: str | None = None
